@@ -22,13 +22,15 @@
 
 		<exec executable="${executable}">
 
+			<arg value="--errors" />
+
 			<arg value="--file" />
 			<arg value="pom-scm.xml" />
 
 			<arg value="generate-sources" />
 
 			<arg value="--activate-profiles" />
-			<arg value="checkout" />
+			<arg value="clone" />
 
 		</exec>
 

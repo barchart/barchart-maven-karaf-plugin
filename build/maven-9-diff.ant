@@ -22,10 +22,15 @@
 
 		<exec executable="${executable}">
 
-			<arg value="generate-sources" />
+			<arg value="--errors" />
+
+			<arg value="--file" />
+			<arg value="pom-scm.xml" />
+
+			<arg value="process-sources" />
 
 			<arg value="--activate-profiles" />
-			<arg value="difference" />
+			<arg value="diff" />
 
 		</exec>
 

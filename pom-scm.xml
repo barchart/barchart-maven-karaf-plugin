@@ -12,7 +12,7 @@
 	</parent>
 
 	<groupId>com.barchart.maven</groupId>
-	<artifactId>barchart-maven-karaf-plugin</artifactId>
+	<artifactId>barchart-maven-karaf-plugin-scm</artifactId>
 	<version>0.0.0</version>
 	<packaging>pom</packaging>
 
@@ -20,9 +20,17 @@
 
 	<properties>
 
-		<gitUrl>scm:git:git://github.com/apache/karaf.git</gitUrl>
-		<gitFolder>${basedir}/target/checkout</gitFolder>
+		<!-- Remote source repo -->
+		<gitUrl>git://github.com/apache/karaf.git</gitUrl>
+
+		<!-- Local source repo. -->
+		<gitRepo>repo</gitRepo>
+
+		<!-- Project module relative folder. -->
 		<gitModule>tooling/karaf-maven-plugin</gitModule>
+
+		<!-- Project module in the local repo. -->
+		<gitModuleFolder>${gitRepo}/${gitModule}</gitModuleFolder>
 
 		<karafVersion>3.0.0.RC1</karafVersion>
 
@@ -32,39 +40,141 @@
 
 		<!-- Get updated source. -->
 		<profile>
-			<id>checkout</id>
+			<id>clone</id>
 			<build>
 				<plugins>
 
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-scm-plugin</artifactId>
-						<version>1.7</version>
-						<configuration>
-							<connectionType>connection</connectionType>
-							<connectionUrl>${gitUrl}</connectionUrl>
-							<checkoutDirectory>${gitFolder}</checkoutDirectory>
-						</configuration>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>groovy-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>checkout</id>
+								<id>clone</id>
 								<phase>generate-sources</phase>
 								<goals>
-									<goal>checkout</goal>
+									<goal>execute</goal>
 								</goals>
 								<configuration>
-									<skipCheckoutIfExists>true</skipCheckoutIfExists>
-									<scmVersion>trunk</scmVersion>
-									<scmVersionType>branch</scmVersionType>
+									<source>
+		<![CDATA[
+		def baseDir = project.basedir
+		def gitUrl = project.properties.gitUrl
+		def gitRepo = project.properties.gitRepo
+		
+		def command
+		def workDir
+		if( new File("$gitRepo", ".git").exists() ){
+			command = [ "git", "pull" ]
+			workDir = new File("$gitRepo")
+		} else{
+			command = [ "git", "clone", gitUrl, gitRepo ]
+			workDir = baseDir
+		}
+		
+		// 		
+		println "### command: ${command}"
+
+		def builder = new ProcessBuilder(command).directory(workDir)
+		def process = builder.start(); process.waitFor()
+
+		// Process standard output..
+		def stdText = "${process.in.text}"
+		 
+		// Process error output.
+		def errText = "${process.err.text}"
+		println "${errText}"
+		
+		if(errText.contains("error") || errText.contains("fatal")){
+			throw new Exception("Git failed, see messages above. ")
+		}
+		]]>
+									</source>
 								</configuration>
 							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- Make local developer working copy from local Apache clone. -->
+		<profile>
+			<id>copy</id>
+			<build>
+				<plugins>
+					<!-- Copy pom.xml, main and test source folders to working copy. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
 							<execution>
-								<id>update</id>
+								<id>copy-src</id>
 								<phase>generate-sources</phase>
 								<goals>
-									<goal>update</goal>
+									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
+									<resources>
+										<resource>
+											<directory>${gitModuleFolder}/src/</directory>
+										</resource>
+									</resources>
+									<outputDirectory>${basedir}/src/</outputDirectory>
+									<overwrite>true</overwrite>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- Apply patches. -->
+		<profile>
+			<id>apply</id>
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>groovy-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>apply-patch</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<source>
+		<![CDATA[
+		def baseDir = project.basedir
+		def patchDir = new File(baseDir, "patch")
+		
+		def fileList = []
+		patchDir.eachFileMatch (~/.*.patch/) { 
+			file -> fileList << file.getAbsolutePath() }
+		if(fileList.isEmpty()){
+			println "### No patch files."
+			return
+		}
+
+		def command = [ "git", "apply", "--verbose" ] + fileList
+		println "### command: ${command}"
+		
+		def builder = new ProcessBuilder(command).directory(baseDir)
+		def process = builder.start(); process.waitFor()
+
+		def stdText = "${process.in.text}"
+		def errText = "${process.err.text}"
+		println "${errText}"
+		
+		if(errText.contains("error") || errText.contains("fatal")){
+			throw new Exception("Git failed, see messages above. ")
+		}
+		]]>
+									</source>
 								</configuration>
 							</execution>
 						</executions>
@@ -76,10 +186,63 @@
 
 		<!-- Produce git diff between Apache and Barchart. -->
 		<profile>
-			<id>difference</id>
+			<id>diff</id>
 			<build>
 				<plugins>
 
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>groovy-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>create-patch</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<source>
+		<![CDATA[
+		def baseDir = project.basedir
+		def patchDir = new File(baseDir, "patch")
+		def patchFile = new File(patchDir, "current.patch")
+		def gitModuleFolder = project.properties.gitModuleFolder
+		def source = gitModuleFolder + "/src/"
+		def target = "src/"
+	
+		def command = [ "git", "diff", "--relative", "--no-index",  "--", source, target ]
+		println "### command: ${command}"
+		
+		def builder = new ProcessBuilder(command).directory(baseDir)
+		def process = builder.start(); process.waitFor()
+		
+		def stdText = "${process.in.text}"
+		def errText = "${process.err.text}" 
+		println "${errText}"
+		
+		if(errText.contains("error") || errText.contains("fatal")) {
+			throw new Exception("Git failed, see error messages above.")
+		}
+
+		patchFile.delete()
+		
+		if(stdText.isEmpty()){
+			println "### No difference."
+			return
+		}
+		
+		// Format patch for sumbission to Apache.
+		def diffText = stdText.replaceAll(gitModuleFolder,"")
+		
+		// Create patch file.
+		patchFile.write(diffText)
+		println "### Patch created: " + patchFile 
+		]]>
+									</source>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 
 				</plugins>
 			</build>
@@ -92,7 +255,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-invoker-plugin</artifactId>
-						<version>1.7</version>
 						<configuration>
 							<streamLogs>true</streamLogs>
 							<projectsDirectory>${basedir}/src-main-it</projectsDirectory>
