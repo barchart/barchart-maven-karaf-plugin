@@ -290,7 +290,7 @@
 		 
 		// Process error output.
 		def errText = "${process.err.text}"
-		println "${errText}"
+		println "### result: ${errText}"
 		
 		if(errText.contains("error") || errText.contains("fatal")){
 			throw new Exception("Git failed, see messages above. ")
@@ -362,7 +362,8 @@
 		
 		def fileList = []
 		patchDir.eachFileMatch (~/.*.patch/) { 
-			file -> fileList << file.getAbsolutePath() }
+			file -> fileList << file.getAbsolutePath() 
+		}
 			
 		if( fileList.isEmpty() ) {
 			println "### No patch files."
@@ -377,7 +378,7 @@
 
 		def stdText = "${process.in.text}"
 		def errText = "${process.err.text}"
-		println "${errText}"
+		println "### result: ${errText}"
 		
 		if(errText.contains("error") || errText.contains("fatal")){
 			throw new Exception("Git failed, see messages above. ")
@@ -427,7 +428,7 @@
 		
 		def stdText = "${process.in.text}"
 		def errText = "${process.err.text}" 
-		println "${errText}"
+		println "### result: ${errText}"
 		
 		if(errText.contains("error") || errText.contains("fatal")) {
 			throw new Exception("Git failed, see error messages above.")
