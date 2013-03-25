@@ -18,6 +18,9 @@
 			<arg value="release:prepare" />
 			<arg value="release:perform" />
 
+			<arg value="-Pclone,copy,apply" />
+			<arg value="-Darguments=clone,copy,apply" />
+
 		</exec>
 
 	</target>
