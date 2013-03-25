@@ -363,7 +363,8 @@
 		def fileList = []
 		patchDir.eachFileMatch (~/.*.patch/) { 
 			file -> fileList << file.getAbsolutePath() }
-		if(fileList.isEmpty()){
+			
+		if( fileList.isEmpty() ) {
 			println "### No patch files."
 			return
 		}
