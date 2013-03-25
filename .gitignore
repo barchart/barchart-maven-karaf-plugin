@@ -28,5 +28,5 @@ pom.xml.*
 #
 # Working copy.
 #
-/repo/
-/src/
+repo/
+src/

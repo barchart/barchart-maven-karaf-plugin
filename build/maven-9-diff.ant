@@ -24,9 +24,6 @@
 
 			<arg value="--errors" />
 
-			<arg value="--file" />
-			<arg value="pom-scm.xml" />
-
 			<arg value="process-sources" />
 
 			<arg value="--activate-profiles" />
