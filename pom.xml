@@ -416,8 +416,8 @@
 		def baseDir = project.basedir
 		def patchDir = new File(baseDir, "patch")
 		def patchFile = new File(patchDir, "current.patch")
-		def gitModuleFolder = project.properties.gitModuleFolder
-		def source = gitModuleFolder + "/src/"
+		def gitModuleFolder = project.properties.gitModuleFolder + "/"
+		def source = gitModuleFolder + "src/"
 		def target = "src/"
 	
 		def command = [ "git", "diff", "--relative", "--no-index",  "--", source, target ]
