@@ -19,7 +19,7 @@
 			<arg value="release:perform" />
 
 			<arg value="-Pclone,copy,apply" />
-			<arg value="-Darguments=clone,copy,apply" />
+			<arg value="-Darguments=-Pclone,copy,apply" />
 
 		</exec>
 
