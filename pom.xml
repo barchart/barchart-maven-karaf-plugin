@@ -25,12 +25,12 @@
         <groupId>com.barchart.base</groupId>
         <artifactId>barchart-archon</artifactId>
         <version>2.5.0</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.barchart.maven</groupId>
     <artifactId>karaf-maven-plugin</artifactId>
-    <version>3.0.0-build001-SNAPSHOT</version>
+    <version>3.0.0-build001</version>
     <packaging>maven-plugin</packaging>
     
     <name>Apache Karaf :: Tooling :: Maven Karaf Plugin</name>
@@ -234,4 +234,8 @@
         </plugins>
     </reporting>
 
+
+  <scm>
+    <tag>karaf-maven-plugin-3.0.0-build001</tag>
+  </scm>
 </project>
