@@ -263,6 +263,7 @@
 									<goal>execute</goal>
 								</goals>
 								<configuration>
+									<providerSelection>2.0</providerSelection>
 									<source>
 		<![CDATA[
 		def baseDir = project.basedir
@@ -282,17 +283,19 @@
 		// 		
 		println "### command: ${command}"
 
-		def builder = new ProcessBuilder(command).directory(workDir)
-		def process = builder.start(); process.waitFor()
+		def process = command.execute(null, baseDir) 
+		def std = new StringBuilder()
+		def err = new StringBuilder()
+		process.waitForProcessOutput(std, err)
 
 		// Process standard output..
-		def stdText = "${process.in.text}"
+		def stdText = std.toString()
 		 
 		// Process error output.
-		def errText = "${process.err.text}"
+		def errText = err.toString()
 		println "### result: ${errText}"
 		
-		if(errText.contains("error") || errText.contains("fatal")){
+		if(errText.contains("error:") || errText.contains("fatal:")){
 			throw new Exception("Git failed, see messages above. ")
 		}
 		]]>
@@ -355,6 +358,7 @@
 									<goal>execute</goal>
 								</goals>
 								<configuration>
+									<providerSelection>2.0</providerSelection>
 									<source>
 		<![CDATA[
 		def baseDir = project.basedir
@@ -373,14 +377,16 @@
 		def command = [ "git", "apply", "--verbose" ] + fileList
 		println "### command: ${command}"
 		
-		def builder = new ProcessBuilder(command).directory(baseDir)
-		def process = builder.start(); process.waitFor()
+		def process = command.execute(null, baseDir) 
+		def std = new StringBuilder()
+		def err = new StringBuilder()
+		process.waitForProcessOutput(std, err)
 
-		def stdText = "${process.in.text}"
-		def errText = "${process.err.text}"
+		def stdText = std.toString()
+		def errText = err.toString()
 		println "### result: ${errText}"
 		
-		if(errText.contains("error") || errText.contains("fatal")){
+		if(errText.contains("error:") || errText.contains("fatal:")){
 			throw new Exception("Git failed, see messages above. ")
 		}
 		]]>
