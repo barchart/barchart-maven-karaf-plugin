@@ -211,15 +211,14 @@
 						<configuration>
 							<debug>false</debug>
 							<streamLogs>true</streamLogs>
-							<projectsDirectory>src/it</projectsDirectory>
-							<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+							<projectsDirectory>${basedir}/src/it</projectsDirectory>
+							<cloneProjectsTo>${basedir}/target/it</cloneProjectsTo>
 							<pomIncludes>
-								<pomInclude>${integrationTestName}/pom.xml</pomInclude>
+								<include>${integrationTestName}/pom.xml</include>
 							</pomIncludes>
 							<postBuildHookScript>verify</postBuildHookScript>
-							<mavenOpts>-Djava.io.tmpdir=${project.build.directory}</mavenOpts>
 							<goals>
-								<goal>install</goal>
+								<goal>install -U</goal>
 							</goals>
 						</configuration>
 						<executions>
@@ -360,7 +359,7 @@
 							</execution>
 						</executions>
 					</plugin>
-					
+
 				</plugins>
 			</build>
 		</profile>

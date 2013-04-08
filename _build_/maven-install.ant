@@ -15,7 +15,6 @@
 		<exec executable="${executable}">
 
 			<arg value="clean" />
-			<arg value="source:jar-no-fork" />
 			<arg value="install" />
 
 		</exec>
