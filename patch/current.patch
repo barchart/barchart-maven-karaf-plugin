@@ -137,18 +137,9 @@ index 0000000..d75044b
 +
 +return false;
 diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-index 65d4aa8..c3261d4 100644
+index 65d4aa8..4b4a995 100644
 --- a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
 +++ b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-@@ -67,7 +67,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
-  * Generates the features XML file
-  * NB this requires a recent maven-install-plugin such as 2.3.1
-  *
-- * @goal features-generate-descriptor
-+ * @goal features-generate-descriptor-xxx
-  * @phase compile
-  * @requiresDependencyResolution runtime
-  * @inheritByDefault true
 @@ -103,7 +103,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
       *
       * @parameter default-value="${project.build.directory}/feature/feature.xml"
@@ -250,12 +241,12 @@ index 65d4aa8..c3261d4 100644
              IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
          getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
          //read in an existing feature.xml
-diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo2.java b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo2.java
+diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateSemanticMojo.java b/src/main/java/org/apache/karaf/tooling/features/GenerateSemanticMojo.java
 new file mode 100644
-index 0000000..6f8194a
+index 0000000..6009170
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo2.java
-@@ -0,0 +1,170 @@
++++ b/src/main/java/org/apache/karaf/tooling/features/GenerateSemanticMojo.java
+@@ -0,0 +1,177 @@
 +/**
 + *
 + * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -302,25 +293,26 @@ index 0000000..6f8194a
 +import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
 +import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
 +import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
++import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
++import org.sonatype.aether.util.graph.transformer.ConflictIdSorter;
++import org.sonatype.aether.util.graph.transformer.ConflictMarker;
 +import org.sonatype.aether.util.graph.transformer.NoopDependencyGraphTransformer;
 +
 +/**
-+ * Generates the features XML file for packaging=bundle
++ * Generates the semantic features XML file for packaging=pom
 + * 
-+ * @goal features-generate-descriptor
++ * @goal features-generate-semantic
 + * @phase compile
 + * @requiresDependencyResolution runtime
 + * @inheritByDefault true
-+ * @description Generates the features XML file starting with an optional source
-+ *              feature.xml and adding project dependencies as bundles and
-+ *              feature/kar dependencies
++ * @description TODO
 + * 
 + * @author Andrei Pozolotin
 + */
-+public class GenerateDescriptorMojo2 extends GenerateDescriptorMojo {
++public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 +
 +	/**
-+	 * Dependency scope to include. Default include: compile, runtime.
++	 * Dependency scope to include. Default include: compile.
 +	 * 
 +	 * @parameter
 +	 */
@@ -328,17 +320,18 @@ index 0000000..6f8194a
 +	{
 +		scopeIncluded = new HashSet<String>();
 +		scopeIncluded.add("compile");
-+		scopeIncluded.add("runtime");
 +	}
 +
 +	/**
-+	 * Dependency scope to exclude. Default exclude: provided, system, test.
++	 * Dependency scope to exclude. Default exclude: runtime, provided, system,
++	 * test.
 +	 * 
 +	 * @parameter
 +	 */
 +	protected Set<String> scopeExcluded;
 +	{
 +		scopeExcluded = new HashSet<String>();
++		scopeExcluded.add("runtime");
 +		scopeExcluded.add("provided");
 +		scopeExcluded.add("system");
 +		scopeExcluded.add("test");
@@ -378,8 +371,13 @@ index 0000000..6f8194a
 +
 +		localSession.setDependencySelector(selector);
 +
-+		localSession
-+				.setDependencyGraphTransformer(new NoopDependencyGraphTransformer());
++		ConflictMarker marker = new ConflictMarker();
++		ConflictIdSorter sorter = new ConflictIdSorter();
++		SemanticTransformer semanter = new SemanticTransformer();
++		ChainedDependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(
++				marker, sorter, semanter);
++
++		localSession.setDependencyGraphTransformer(transformer);
 +
 +		final CollectResult collectResult = system.collectDependencies(
 +				localSession, collectRequest);
@@ -448,6 +446,33 @@ index cb804e8..c9b2c07 100644
 +    }
  
  }
+diff --git a/src/main/java/org/apache/karaf/tooling/features/SemanticTransformer.java b/src/main/java/org/apache/karaf/tooling/features/SemanticTransformer.java
+new file mode 100644
+index 0000000..5692fa9
+--- /dev/null
++++ b/src/main/java/org/apache/karaf/tooling/features/SemanticTransformer.java
+@@ -0,0 +1,21 @@
++package org.apache.karaf.tooling.features;
++
++import org.sonatype.aether.RepositoryException;
++import org.sonatype.aether.collection.DependencyGraphTransformationContext;
++import org.sonatype.aether.collection.DependencyGraphTransformer;
++import org.sonatype.aether.graph.DependencyNode;
++
++/**
++ * @author Andrei Pozolotin
++ */
++public class SemanticTransformer implements DependencyGraphTransformer {
++
++	public DependencyNode transformGraph(DependencyNode node,
++			DependencyGraphTransformationContext context)
++			throws RepositoryException {
++
++		return node;
++	
++	}
++
++}
 diff --git a/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java b/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java
 new file mode 100644
 index 0000000..b9f0829
@@ -619,11 +644,11 @@ index 0000000..b9f0829
 +	}
 +
 +}
-diff --git a/src/test/java/org/apache/karaf/tooling/ap/GenerateDescriptorMojo2Test.java b/src/test/java/org/apache/karaf/tooling/ap/GenerateDescriptorMojo2Test.java
+diff --git a/src/test/java/org/apache/karaf/tooling/ap/GenerateSemanticMojoTest.java b/src/test/java/org/apache/karaf/tooling/ap/GenerateSemanticMojoTest.java
 new file mode 100644
-index 0000000..f51e286
+index 0000000..7ff4682
 --- /dev/null
-+++ b/src/test/java/org/apache/karaf/tooling/ap/GenerateDescriptorMojo2Test.java
++++ b/src/test/java/org/apache/karaf/tooling/ap/GenerateSemanticMojoTest.java
 @@ -0,0 +1,174 @@
 +/*
 + * Licensed to the Apache Software Foundation (ASF) under one
@@ -663,7 +688,7 @@ index 0000000..f51e286
 +import org.apache.karaf.features.internal.model.Features;
 +import org.apache.karaf.features.internal.model.Feature;
 +import org.apache.karaf.features.internal.model.JaxbUtil;
-+import org.apache.karaf.tooling.features.GenerateDescriptorMojo2;
++import org.apache.karaf.tooling.features.GenerateSemanticMojo;
 +import org.apache.maven.project.MavenProject;
 +import org.junit.Test;
 +import org.xml.sax.SAXException;
@@ -674,7 +699,7 @@ index 0000000..f51e286
 +import org.sonatype.aether.RepositorySystemSession;
 +import org.sonatype.aether.artifact.Artifact;
 +
-+public class GenerateDescriptorMojo2Test {
++public class GenerateSemanticMojoTest {
 +
 +	@Test
 +	public void dependency0() throws Exception {
@@ -704,7 +729,7 @@ index 0000000..f51e286
 +		RepositorySystemSession session = UnitHelp.newSession(system);
 +
 +		Logger logger = UnitHelp.logger();
-+		Map<Artifact, String> dependencyMap = GenerateDescriptorMojo2.prepare(
++		Map<Artifact, String> dependencyMap = GenerateSemanticMojo.prepare(
 +				logger, project, scopeIncluded, scopeExcluded, system, session,
 +				null);
 +
@@ -746,7 +771,7 @@ index 0000000..f51e286
 +		RepositorySystemSession session = UnitHelp.newSession(system);
 +
 +		Logger logger = UnitHelp.logger();
-+		Map<Artifact, String> dependencyMap = GenerateDescriptorMojo2.prepare(
++		Map<Artifact, String> dependencyMap = GenerateSemanticMojo.prepare(
 +				logger, project, scopeIncluded, scopeExcluded, system, session,
 +				null);
 +
@@ -786,7 +811,7 @@ index 0000000..f51e286
 +		RepositorySystemSession session = UnitHelp.newSession(system);
 +
 +		Logger logger = UnitHelp.logger();
-+		Map<Artifact, String> dependencyMap = GenerateDescriptorMojo2.prepare(
++		Map<Artifact, String> dependencyMap = GenerateSemanticMojo.prepare(
 +				logger, project, scopeIncluded, scopeExcluded, system, session,
 +				null);
 +
