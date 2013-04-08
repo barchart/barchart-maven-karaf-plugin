@@ -311,7 +311,33 @@
 			<id>copy</id>
 			<build>
 				<plugins>
-					<!-- Copy pom.xml, main and test source folders to working copy. -->
+
+					<!-- Clear source in working copy. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-clean-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>clean-work</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>clean</goal>
+								</goals>
+								<configuration>
+									<filesets>
+										<fileset>
+											<directory>${basedir}/src/</directory>
+											<includes>
+												<include>**/*</include>
+											</includes>
+										</fileset>
+									</filesets>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- Copy source to working copy. -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-resources-plugin</artifactId>
@@ -334,6 +360,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					
 				</plugins>
 			</build>
 		</profile>
