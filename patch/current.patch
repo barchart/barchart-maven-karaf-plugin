@@ -1,12 +1,1152 @@
+diff --git a/src/it/test-feature-range/control.xml b/src/it/test-feature-range/control.xml
+new file mode 100644
+index 0000000..06139fe
+--- /dev/null
++++ b/src/it/test-feature-range/control.xml
+@@ -0,0 +1,21 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<!--
++  ~ Licensed to the Apache Software Foundation (ASF) under one
++  ~ or more contributor license agreements.  See the NOTICE file
++  ~ distributed with this work for additional information
++  ~ regarding copyright ownership.  The ASF licenses this file
++  ~ to you under the Apache License, Version 2.0 (the
++  ~ "License"); you may not use this file except in compliance
++  ~ with the License.  You may obtain a copy of the License at
++  ~
++  ~   http://www.apache.org/licenses/LICENSE-2.0
++  ~
++  ~ Unless required by applicable law or agreed to in writing,
++  ~ software distributed under the License is distributed on an
++  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++  ~ KIND, either express or implied.  See the License for the
++  ~ specific language governing permissions and limitations
++  ~ under the License.
++  -->
++
++<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="test-basic-generation"/>
+diff --git a/src/it/test-feature-range/pom.xml b/src/it/test-feature-range/pom.xml
+new file mode 100644
+index 0000000..5ad987a
+--- /dev/null
++++ b/src/it/test-feature-range/pom.xml
+@@ -0,0 +1,64 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!-- ~ Licensed to the Apache Software Foundation (ASF) under one ~ or more 
++	contributor license agreements. See the NOTICE file ~ distributed with this 
++	work for additional information ~ regarding copyright ownership. The ASF 
++	licenses this file ~ to you under the Apache License, Version 2.0 (the ~ 
++	"License"); you may not use this file except in compliance ~ with the License. 
++	You may obtain a copy of the License at ~ ~ http://www.apache.org/licenses/LICENSE-2.0 
++	~ ~ Unless required by applicable law or agreed to in writing, ~ software 
++	distributed under the License is distributed on an ~ "AS IS" BASIS, WITHOUT 
++	WARRANTIES OR CONDITIONS OF ANY ~ KIND, either express or implied. See the 
++	License for the ~ specific language governing permissions and limitations 
++	~ under the License. -->
++<project
++	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
++	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
++	<modelVersion>4.0.0</modelVersion>
++
++	<groupId>test</groupId>
++	<artifactId>test-feature-range</artifactId>
++	<version>1.0-SNAPSHOT</version>
++	<packaging>pom</packaging>
++
++	<properties>
++		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++	</properties>
++
++	<dependencies>
++
++		<!-- API Consumer bundle dependency. -->
++		<dependency>
++			<groupId>com.barchart.version.tester</groupId>
++			<artifactId>tester-one-api-consumer</artifactId>
++			<version>[3,4)</version>
++		</dependency>
++
++		<!-- API Provider bundle dependency. -->
++		<dependency>
++			<groupId>com.barchart.version.tester</groupId>
++			<artifactId>tester-one-api-provider</artifactId>
++			<version>[5,6)</version>
++		</dependency>
++
++	</dependencies>
++
++	<build>
++		<plugins>
++
++			<plugin>
++				<groupId>org.apache.karaf.tooling</groupId>
++				<artifactId>karaf-maven-plugin</artifactId>
++				<version>@pom.version@</version>
++				<extensions>true</extensions>
++				<executions>
++					<execution>
++						<goals>
++							<goal>features-generate-descriptor</goal>
++						</goals>
++					</execution>
++				</executions>
++			</plugin>
++
++		</plugins>
++	</build>
++</project>
+diff --git a/src/it/test-feature-range/verify.bsh b/src/it/test-feature-range/verify.bsh
+new file mode 100644
+index 0000000..d75044b
+--- /dev/null
++++ b/src/it/test-feature-range/verify.bsh
+@@ -0,0 +1,35 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied.  See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++import org.custommonkey.xmlunit.*;
++import java.io.*;
++import java.lang.*;
++
++Reader r = new FileReader(new File(basedir, "control.xml"));
++
++// load the features file pushed to the repository
++File generated = new File( localRepositoryPath, "test/test-basic-generation/1.0-SNAPSHOT/test-basic-generation-1.0-SNAPSHOT-features.xml" );
++if (generated.exists()) {
++    try {
++        XMLAssert.assertXMLEqual(r, new FileReader(generated));
++        return true;
++    } catch (Throwable ignored) { }
++}
++
++return false;
 diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-index 65d4aa8..ec351b4 100644
+index 65d4aa8..c3261d4 100644
 --- a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
 +++ b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-@@ -74,7 +74,6 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
-  * @description Generates the features XML file starting with an optional source feature.xml and adding
-  * project dependencies as bundles and feature/car dependencies
-  */
--@SuppressWarnings("unchecked")
- public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+@@ -67,7 +67,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
+  * Generates the features XML file
+  * NB this requires a recent maven-install-plugin such as 2.3.1
+  *
+- * @goal features-generate-descriptor
++ * @goal features-generate-descriptor-xxx
+  * @phase compile
+  * @requiresDependencyResolution runtime
+  * @inheritByDefault true
+@@ -103,7 +103,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      *
+      * @parameter default-value="${project.build.directory}/feature/feature.xml"
+      */
+-    private File outputFile;
++    protected File outputFile;
  
      /**
+      * The resolver to use for the feature.  Normally null or "OBR" or "(OBR)"
+@@ -117,14 +117,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      *
+      * @parameter default-value="xml"
+      */
+-    private String attachmentArtifactType = "xml";
++    protected String attachmentArtifactType = "xml";
+ 
+     /**
+      * (wrapper) The artifact classifier for attaching the generated file to the project
+      *
+      * @parameter default-value="features"
+      */
+-    private String attachmentArtifactClassifier = "features";
++    protected String attachmentArtifactClassifier = "features";
+ 
+     /**
+      * Specifies whether features dependencies of this project will be included inline of the the
+@@ -169,7 +169,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      *
+      * @parameter default-value="true"
+      */
+-    private boolean includeTransitiveDependency;
++    protected boolean includeTransitiveDependency;
+ 
+     /**
+      * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
+@@ -208,7 +208,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @required
+      * @readonly
+      */
+-    private RepositorySystem repoSystem;
++    protected RepositorySystem repoSystem;
+ 
+     /**
+      * The current repository/network configuration of Maven.
+@@ -217,7 +217,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @required
+      * @readonly
+      */
+-    private RepositorySystemSession repoSession;
++    protected RepositorySystemSession repoSession;
+ 
+     /**
+      * The project's remote repositories to use for the resolution of project dependencies.
+@@ -225,7 +225,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @parameter default-value="${project.remoteProjectRepositories}"
+      * @readonly
+      */
+-    private List<RemoteRepository> projectRepos;
++    protected List<RemoteRepository> projectRepos;
+ 
+     /**
+      * The project's remote repositories to use for the resolution of plugins and their dependencies.
+@@ -234,7 +234,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @required
+      * @readonly
+      */
+-    private List<RemoteRepository> pluginRepos;
++    protected List<RemoteRepository> pluginRepos;
+ 
+     /**
+      * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
+@@ -266,12 +266,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+     //maven log
+     private Log log;
+ 
++    protected void prepare() throws Exception {
++        DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
++        dependencyHelper.getDependencies(project, includeTransitiveDependency);
++        this.localDependencies = dependencyHelper.getLocalDependencies();
++        this.treeListing = dependencyHelper.getTreeListing();
++    }
++    
+     public void execute() throws MojoExecutionException, MojoFailureException {
+         try {
+-            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
+-            dependencyHelper.getDependencies(project, includeTransitiveDependency);
+-            this.localDependencies = dependencyHelper.getLocalDependencies();
+-            this.treeListing = dependencyHelper.getTreeListing();
++        	prepare();
+             File dir = outputFile.getParentFile();
+             if (dir.isDirectory() || dir.mkdirs()) {
+                 PrintStream out = new PrintStream(new FileOutputStream(outputFile));
+@@ -295,7 +299,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+     /*
+      * Write all project dependencies as feature
+      */
+-    private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
++    protected void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
+             IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
+         getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
+         //read in an existing feature.xml
+diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo2.java b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo2.java
+new file mode 100644
+index 0000000..6f8194a
+--- /dev/null
++++ b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo2.java
+@@ -0,0 +1,170 @@
++/**
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.
++ * The ASF licenses this file to You under the Apache License, Version 2.0
++ * (the "License"); you may not use this file except in compliance with
++ * the License.  You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package org.apache.karaf.tooling.features;
++
++import java.util.HashMap;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++
++import org.apache.maven.RepositoryUtils;
++import org.apache.maven.project.MavenProject;
++import org.codehaus.plexus.logging.Logger;
++import org.sonatype.aether.RepositorySystem;
++import org.sonatype.aether.RepositorySystemSession;
++import org.sonatype.aether.artifact.Artifact;
++import org.sonatype.aether.collection.CollectRequest;
++import org.sonatype.aether.collection.CollectResult;
++import org.sonatype.aether.collection.DependencySelector;
++import org.sonatype.aether.graph.Dependency;
++import org.sonatype.aether.graph.DependencyNode;
++import org.sonatype.aether.impl.internal.DefaultRepositorySystem;
++import org.sonatype.aether.repository.RemoteRepository;
++import org.sonatype.aether.resolution.DependencyRequest;
++import org.sonatype.aether.resolution.DependencyResult;
++import org.sonatype.aether.util.DefaultRepositorySystemSession;
++import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
++import org.sonatype.aether.util.graph.selector.AndDependencySelector;
++import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
++import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
++import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
++import org.sonatype.aether.util.graph.transformer.NoopDependencyGraphTransformer;
++
++/**
++ * Generates the features XML file for packaging=bundle
++ * 
++ * @goal features-generate-descriptor
++ * @phase compile
++ * @requiresDependencyResolution runtime
++ * @inheritByDefault true
++ * @description Generates the features XML file starting with an optional source
++ *              feature.xml and adding project dependencies as bundles and
++ *              feature/kar dependencies
++ * 
++ * @author Andrei Pozolotin
++ */
++public class GenerateDescriptorMojo2 extends GenerateDescriptorMojo {
++
++	/**
++	 * Dependency scope to include. Default include: compile, runtime.
++	 * 
++	 * @parameter
++	 */
++	protected Set<String> scopeIncluded;
++	{
++		scopeIncluded = new HashSet<String>();
++		scopeIncluded.add("compile");
++		scopeIncluded.add("runtime");
++	}
++
++	/**
++	 * Dependency scope to exclude. Default exclude: provided, system, test.
++	 * 
++	 * @parameter
++	 */
++	protected Set<String> scopeExcluded;
++	{
++		scopeExcluded = new HashSet<String>();
++		scopeExcluded.add("provided");
++		scopeExcluded.add("system");
++		scopeExcluded.add("test");
++	}
++
++	/**
++	 * Find transitive dependencies with given filters.
++	 */
++	public static Map<Artifact, String> prepare( //
++			Logger logger, //
++			MavenProject project, //
++			Set<String> scopeIncluded, //
++			Set<String> scopeExcluded, //
++			RepositorySystem system, //
++			RepositorySystemSession session, //
++			List<RemoteRepository> projectRepos //
++	) throws Exception {
++
++		logger.info("### DependencyGraphTransformer : "
++				+ session.getDependencyGraphTransformer());
++
++		final Artifact artifact = RepositoryUtils.toArtifact(project
++				.getArtifact());
++
++		final Dependency dependencyRoot = new Dependency(artifact, "compile");
++
++		final CollectRequest collectRequest = new CollectRequest(
++				dependencyRoot, projectRepos);
++
++		final DependencySelector selector = new AndDependencySelector(//
++				new OptionalDependencySelector(), //
++				new ScopeDependencySelector(scopeIncluded, scopeExcluded), //
++				new ExclusionDependencySelector());
++
++		final DefaultRepositorySystemSession localSession = new DefaultRepositorySystemSession(
++				session);
++
++		localSession.setDependencySelector(selector);
++
++		localSession
++				.setDependencyGraphTransformer(new NoopDependencyGraphTransformer());
++
++		final CollectResult collectResult = system.collectDependencies(
++				localSession, collectRequest);
++
++		final DependencyNode collectNode = collectResult.getRoot();
++
++		final DependencyRequest dependencyRequest = new DependencyRequest(
++				collectNode, null);
++
++		final DependencyResult resolveResult = system.resolveDependencies(
++				localSession, dependencyRequest);
++
++		final DependencyNode resolvedNode = resolveResult.getRoot();
++
++		final PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
++
++		resolvedNode.accept(generator);
++
++		final List<Dependency> dependencyList = generator.getDependencies(true);
++
++		// [dependency:scope]
++		final Map<Artifact, String> dependencyMap = new HashMap<Artifact, String>();
++
++		for (Dependency dependency : dependencyList) {
++
++			logger.info("### dependency : " + dependency);
++
++			dependencyMap.put(dependency.getArtifact(), dependency.getScope());
++
++		}
++
++		return dependencyMap;
++
++	}
++
++	@Override
++	protected void prepare() throws Exception {
++
++		this.localDependencies = prepare(getLogger(), project, scopeIncluded,
++				scopeExcluded, repoSystem, repoSession, projectRepos);
++
++		this.treeListing = "not available";
++
++	}
++
++}
+diff --git a/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java b/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
+index cb804e8..c9b2c07 100644
+--- a/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
++++ b/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
+@@ -36,6 +36,7 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
+ import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
+ import org.apache.maven.artifact.repository.metadata.Versioning;
+ import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
++import org.apache.maven.project.MavenProject;
+ import org.sonatype.aether.util.artifact.DefaultArtifact;
+ 
+ /**
+@@ -218,5 +219,9 @@ public class MavenUtil {
+         Writer writer = new FileWriter(target);
+         metadataWriter.write(writer, metadata);
+     }
++    
++    public static Artifact toAetherArtifact(MavenProject project){
++    	return null;
++    }
+ 
+ }
+diff --git a/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java b/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java
+new file mode 100644
+index 0000000..b9f0829
+--- /dev/null
++++ b/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java
+@@ -0,0 +1,165 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied.  See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.karaf.tooling.ap;
++
++import static org.junit.Assert.*;
++
++import java.io.ByteArrayOutputStream;
++import java.io.File;
++import java.io.InputStream;
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.List;
++import java.util.Set;
++
++import javax.xml.bind.JAXBException;
++import javax.xml.parsers.ParserConfigurationException;
++import javax.xml.stream.XMLStreamException;
++
++import org.apache.karaf.features.FeaturesNamespaces;
++import org.apache.karaf.features.internal.model.Features;
++import org.apache.karaf.features.internal.model.Feature;
++import org.apache.karaf.features.internal.model.JaxbUtil;
++import org.apache.karaf.tooling.features.DependencyHelper;
++import org.apache.maven.project.MavenProject;
++import org.apache.maven.repository.internal.MavenRepositorySystemSession;
++import org.junit.Test;
++import org.xml.sax.SAXException;
++
++import org.codehaus.plexus.DefaultPlexusContainer;
++import org.sonatype.aether.RepositorySystem;
++import org.sonatype.aether.RepositorySystemSession;
++import org.sonatype.aether.artifact.Artifact;
++import org.sonatype.aether.collection.CollectRequest;
++import org.sonatype.aether.collection.CollectResult;
++import org.sonatype.aether.collection.DependencyGraphTransformer;
++import org.sonatype.aether.graph.Dependency;
++import org.sonatype.aether.graph.DependencyNode;
++import org.sonatype.aether.graph.Exclusion;
++import org.sonatype.aether.repository.RemoteRepository;
++import org.sonatype.aether.resolution.DependencyRequest;
++import org.sonatype.aether.resolution.DependencyResult;
++import org.sonatype.aether.util.DefaultRepositorySystemSession;
++import org.sonatype.aether.util.artifact.DefaultArtifact;
++import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
++import org.sonatype.aether.util.graph.selector.AndDependencySelector;
++import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
++import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
++import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
++import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
++import org.sonatype.aether.util.graph.transformer.ConflictMarker;
++import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
++import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
++
++public class DependencyHelperTest {
++
++	DependencyHelper newHelper() throws Exception {
++
++		final List<RemoteRepository> remoteList = new ArrayList<RemoteRepository>();
++		remoteList.add(UnitHelp.newRepoCentral());
++
++		final List<RemoteRepository> pluginRepos = remoteList;
++		final List<RemoteRepository> projectRepos = remoteList;
++		final RepositorySystem system = UnitHelp.newSystem();
++		final RepositorySystemSession session = UnitHelp.newSession(system);
++
++		final DependencyHelper helper = new DependencyHelper(pluginRepos,
++				projectRepos, session, system);
++
++		return helper;
++
++	}
++
++	@Test
++	public void dependency() throws Exception {
++
++		final String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
++
++		final DependencyHelper helper = newHelper();
++
++		final MavenProject project = UnitHelp.newProject(uri);
++
++		Collection<String> included = null;
++		Collection<String> excluded = null;
++
++		helper.getDependencies(project, true);
++
++		final String report = helper.getTreeListing();
++
++		System.out.println("\n" + report);
++
++	}
++
++	public static void main(String[] args) throws Exception {
++
++		final String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:jar:1.1.3";
++
++		final Artifact artifact = new DefaultArtifact(uri);
++
++		Dependency dependency = new Dependency(artifact, "compile");
++
++		CollectRequest collectRequest = new CollectRequest(dependency, null);
++
++		RepositorySystem system = UnitHelp.newSystem();
++
++		MavenRepositorySystemSession session = UnitHelp.newSession(system);
++
++		session.setOffline(true);
++
++		Collection<String> scopeIncluded = new ArrayList<String>();
++		Collection<String> scopeExcluded = new ArrayList<String>();
++
++		scopeIncluded.add("provided");
++
++		scopeExcluded.add("test");
++
++		session.setDependencySelector( //
++		new AndDependencySelector(//
++				new OptionalDependencySelector(), //
++				new ScopeDependencySelector(scopeIncluded, scopeExcluded), //
++				new ExclusionDependencySelector()) //
++		);
++
++		CollectResult collectResult = system.collectDependencies(session,
++				collectRequest);
++
++		DependencyNode collectNode = collectResult.getRoot();
++
++		final DependencyRequest dependencyRequest = new DependencyRequest(
++				collectNode, null);
++
++		final DependencyResult result = system.resolveDependencies(session,
++				dependencyRequest);
++
++		final DependencyNode resolveNode = result.getRoot();
++
++		final PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
++
++		resolveNode.accept(generator);
++
++		List<Artifact> list = generator.getArtifacts(true);
++
++		for (Artifact item : list) {
++			System.out.println("item = " + item );
++		}
++
++	}
++
++}
+diff --git a/src/test/java/org/apache/karaf/tooling/ap/GenerateDescriptorMojo2Test.java b/src/test/java/org/apache/karaf/tooling/ap/GenerateDescriptorMojo2Test.java
+new file mode 100644
+index 0000000..f51e286
+--- /dev/null
++++ b/src/test/java/org/apache/karaf/tooling/ap/GenerateDescriptorMojo2Test.java
+@@ -0,0 +1,174 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied.  See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.karaf.tooling.ap;
++
++import static org.junit.Assert.*;
++
++import java.io.ByteArrayOutputStream;
++import java.io.InputStream;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++
++import javax.xml.bind.JAXBException;
++import javax.xml.parsers.ParserConfigurationException;
++import javax.xml.stream.XMLStreamException;
++
++import org.apache.karaf.features.FeaturesNamespaces;
++import org.apache.karaf.features.internal.model.Features;
++import org.apache.karaf.features.internal.model.Feature;
++import org.apache.karaf.features.internal.model.JaxbUtil;
++import org.apache.karaf.tooling.features.GenerateDescriptorMojo2;
++import org.apache.maven.project.MavenProject;
++import org.junit.Test;
++import org.xml.sax.SAXException;
++
++import org.codehaus.plexus.DefaultPlexusContainer;
++import org.codehaus.plexus.logging.Logger;
++import org.sonatype.aether.RepositorySystem;
++import org.sonatype.aether.RepositorySystemSession;
++import org.sonatype.aether.artifact.Artifact;
++
++public class GenerateDescriptorMojo2Test {
++
++	@Test
++	public void dependency0() throws Exception {
++
++		System.out.println("---");
++
++		String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
++
++		MavenProject project = UnitHelp.newProject(uri);
++
++		Set<String> scopeIncluded;
++		{
++			scopeIncluded = new HashSet<String>();
++			scopeIncluded.add("compile");
++			scopeIncluded.add("runtime");
++		}
++
++		Set<String> scopeExcluded;
++		{
++			scopeExcluded = new HashSet<String>();
++			scopeExcluded.add("provided");
++			scopeExcluded.add("system");
++			scopeExcluded.add("test");
++		}
++
++		RepositorySystem system = UnitHelp.newSystem();
++		RepositorySystemSession session = UnitHelp.newSession(system);
++
++		Logger logger = UnitHelp.logger();
++		Map<Artifact, String> dependencyMap = GenerateDescriptorMojo2.prepare(
++				logger, project, scopeIncluded, scopeExcluded, system, session,
++				null);
++
++		for (Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
++			Artifact artifact = entry.getKey();
++			String scope = entry.getValue();
++			System.out.println(artifact + " @ " + scope);
++		}
++
++		assertEquals(1, dependencyMap.size());
++
++	}
++
++	@Test
++	public void dependency1() throws Exception {
++
++		System.out.println("---");
++
++		String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
++
++		MavenProject project = UnitHelp.newProject(uri);
++
++		Set<String> scopeIncluded;
++		{
++			scopeIncluded = new HashSet<String>();
++			scopeIncluded.add("provided");
++			scopeIncluded.add("runtime");
++		}
++
++		Set<String> scopeExcluded;
++		{
++			scopeExcluded = new HashSet<String>();
++			scopeExcluded.add("compile");
++			scopeExcluded.add("system");
++			scopeExcluded.add("test");
++		}
++
++		RepositorySystem system = UnitHelp.newSystem();
++		RepositorySystemSession session = UnitHelp.newSession(system);
++
++		Logger logger = UnitHelp.logger();
++		Map<Artifact, String> dependencyMap = GenerateDescriptorMojo2.prepare(
++				logger, project, scopeIncluded, scopeExcluded, system, session,
++				null);
++
++		for (Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
++			Artifact artifact = entry.getKey();
++			String scope = entry.getValue();
++			System.out.println(artifact + " @ " + scope);
++		}
++
++		assertEquals(5, dependencyMap.size());
++
++	}
++
++	@Test
++	public void dependency2() throws Exception {
++
++		String uri = "com.carrotgarden.log:carrot-log4j-aws-sns-pax-feature:pom:1.1.3";
++
++		MavenProject project = UnitHelp.newProject(uri);
++
++		Set<String> scopeIncluded;
++		{
++			scopeIncluded = new HashSet<String>();
++			scopeIncluded.add("compile");
++			scopeIncluded.add("runtime");
++		}
++
++		Set<String> scopeExcluded;
++		{
++			scopeExcluded = new HashSet<String>();
++			scopeExcluded.add("provided");
++			scopeExcluded.add("system");
++			scopeExcluded.add("test");
++		}
++
++		RepositorySystem system = UnitHelp.newSystem();
++		RepositorySystemSession session = UnitHelp.newSession(system);
++
++		Logger logger = UnitHelp.logger();
++		Map<Artifact, String> dependencyMap = GenerateDescriptorMojo2.prepare(
++				logger, project, scopeIncluded, scopeExcluded, system, session,
++				null);
++
++		for (Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
++			Artifact artifact = entry.getKey();
++			String scope = entry.getValue();
++			System.out.println(artifact + " @ " + scope);
++		}
++
++	}
++
++}
+diff --git a/src/test/java/org/apache/karaf/tooling/ap/KarafDependencySelector.java b/src/test/java/org/apache/karaf/tooling/ap/KarafDependencySelector.java
+new file mode 100644
+index 0000000..66a9b1a
+--- /dev/null
++++ b/src/test/java/org/apache/karaf/tooling/ap/KarafDependencySelector.java
+@@ -0,0 +1,44 @@
++/**
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.
++ * The ASF licenses this file to You under the Apache License, Version 2.0
++ * (the "License"); you may not use this file except in compliance with
++ * the License.  You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package org.apache.karaf.tooling.ap;
++
++import java.util.Collection;
++
++import org.sonatype.aether.collection.DependencyCollectionContext;
++import org.sonatype.aether.collection.DependencySelector;
++import org.sonatype.aether.graph.Dependency;
++
++public class KarafDependencySelector implements DependencySelector {
++
++	public KarafDependencySelector(Collection<String> included,
++			Collection<String> excluded) {
++	}
++
++	public boolean selectDependency(Dependency dependency) {
++		System.out.println("dependency : "+ dependency);
++		return true;
++	}
++
++	@Override
++	public DependencySelector deriveChildSelector(
++			DependencyCollectionContext context) {
++		System.out.println("context    : "+ context);
++		return this;
++	}
++
++}
+diff --git a/src/test/java/org/apache/karaf/tooling/ap/SimpleWagonProvider.java b/src/test/java/org/apache/karaf/tooling/ap/SimpleWagonProvider.java
+new file mode 100644
+index 0000000..773157d
+--- /dev/null
++++ b/src/test/java/org/apache/karaf/tooling/ap/SimpleWagonProvider.java
+@@ -0,0 +1,45 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied.  See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.karaf.tooling.ap;
++
++import org.apache.maven.wagon.Wagon;
++import org.apache.maven.wagon.providers.http.LightweightHttpWagon;
++import org.sonatype.aether.connector.wagon.WagonProvider;
++
++public class SimpleWagonProvider implements WagonProvider {
++	
++	public Wagon lookup(String roleHint) throws Exception {
++		
++		if ("file".equals(roleHint)) {
++			return null;
++		}
++		
++		if (roleHint.startsWith("http")) {
++			return new LightweightHttpWagon();
++		}
++		
++		return null;
++		
++	}
++
++	public void release(Wagon wagon) {
++	}
++	
++}
+diff --git a/src/test/java/org/apache/karaf/tooling/ap/UnitHelp.java b/src/test/java/org/apache/karaf/tooling/ap/UnitHelp.java
+new file mode 100644
+index 0000000..3216221
+--- /dev/null
++++ b/src/test/java/org/apache/karaf/tooling/ap/UnitHelp.java
+@@ -0,0 +1,244 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *  http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied.  See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.karaf.tooling.ap;
++
++import java.io.File;
++import java.util.ArrayList;
++import java.util.List;
++
++import org.ops4j.pax.url.mvn.internal.ManualWagonProvider;
++import org.sonatype.aether.RepositorySystem;
++import org.sonatype.aether.RepositorySystemSession;
++
++import org.sonatype.aether.artifact.Artifact;
++import org.sonatype.aether.collection.CollectRequest;
++import org.sonatype.aether.connector.wagon.WagonProvider;
++import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
++import org.sonatype.aether.graph.Dependency;
++import org.sonatype.aether.graph.DependencyFilter;
++import org.sonatype.aether.graph.DependencyNode;
++import org.sonatype.aether.impl.ArtifactDescriptorReader;
++import org.sonatype.aether.impl.VersionRangeResolver;
++import org.sonatype.aether.impl.VersionResolver;
++import org.sonatype.aether.impl.internal.DefaultRepositorySystem;
++import org.sonatype.aether.impl.internal.DefaultServiceLocator;
++import org.sonatype.aether.repository.LocalRepository;
++import org.sonatype.aether.repository.RemoteRepository;
++import org.sonatype.aether.resolution.ArtifactRequest;
++import org.sonatype.aether.resolution.ArtifactResolutionException;
++import org.sonatype.aether.resolution.ArtifactResult;
++import org.sonatype.aether.resolution.DependencyRequest;
++import org.sonatype.aether.resolution.DependencyResult;
++import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
++import org.sonatype.aether.util.artifact.DefaultArtifact;
++import org.sonatype.aether.util.filter.ScopeDependencyFilter;
++import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
++import org.apache.maven.RepositoryUtils;
++import org.apache.maven.model.Model;
++import org.apache.maven.model.io.DefaultModelReader;
++import org.apache.maven.model.io.ModelReader;
++import org.apache.maven.project.MavenProject;
++import org.apache.maven.repository.internal.DefaultArtifactDescriptorReader;
++import org.apache.maven.repository.internal.DefaultVersionRangeResolver;
++import org.apache.maven.repository.internal.DefaultVersionResolver;
++import org.apache.maven.repository.internal.MavenRepositorySystemSession;
++import org.apache.maven.wagon.Wagon;
++import org.apache.maven.wagon.providers.http.LightweightHttpWagon;
++import org.codehaus.plexus.logging.Logger;
++
++public class UnitHelp {
++
++	/**
++	 * Verify operation manually.
++	 */
++	public static void main(String[] args) throws Exception {
++
++		final RepositorySystem system = newSystem();
++
++		final RepositorySystemSession session = newSession(system);
++
++		// String uri = "jmock:jmock:pom:1.1.0";
++		String uri = "org.apache.maven:maven-profile:2.2.1";
++
++		final Artifact artifact = new DefaultArtifact(uri);
++
++		final Dependency dependency = new Dependency(artifact, "compile");
++
++		final RemoteRepository central = newRepoCentral();
++
++		final CollectRequest collectRequest = new CollectRequest();
++		collectRequest.setRoot(dependency);
++		collectRequest.addRepository(central);
++
++		final DependencyNode collectNode = system.collectDependencies(session,
++				collectRequest).getRoot();
++
++		final List<String> include = new ArrayList<String>();
++		final List<String> exclude = new ArrayList<String>();
++
++		final DependencyFilter filter = new ScopeDependencyFilter(include,
++				exclude);
++
++		final DependencyRequest dependencyRequest = new DependencyRequest(
++				collectNode, filter);
++
++		final DependencyResult result = system.resolveDependencies(session,
++				dependencyRequest);
++
++		final DependencyNode resolveNode = result.getRoot();
++
++		final PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
++
++		resolveNode.accept(generator);
++
++		final String[] pathArray = generator.getClassPath().split(
++				File.pathSeparator);
++
++		for (String path : pathArray) {
++			System.out.println("path = " + path);
++		}
++
++		//
++
++		final MavenProject project = newProject("org.apache.maven:maven-model:pom:3.0");
++
++		System.out.println("project = " + project);
++
++	}
++
++	/**
++	 * Resolve maven URI into maven artifact.
++	 */
++	public static Artifact newArtifact(String mavenURI) throws Exception {
++
++		final RepositorySystem system = newSystem();
++		final RepositorySystemSession session = newSession(system);
++		final RemoteRepository central = newRepoCentral();
++
++		final ArtifactRequest request = new ArtifactRequest();
++		request.setArtifact(new DefaultArtifact(mavenURI));
++		request.addRepository(central);
++
++		final ArtifactResult result = system.resolveArtifact(session, request);
++
++		final Artifact artifact = result.getArtifact();
++
++		return artifact;
++
++	}
++
++	/**
++	 * Resolve maven URI into maven project.
++	 * <p>
++	 * Provides only model and artifact.
++	 */
++	public static MavenProject newProject(String mavenURI) throws Exception {
++
++		final Artifact artifact = newArtifact(mavenURI);
++
++		final File input = artifact.getFile();
++
++		final ModelReader reader = new DefaultModelReader();
++
++		final Model model = reader.read(input, null);
++
++		final MavenProject project = new MavenProject(model);
++
++		project.setArtifact(RepositoryUtils.toArtifact(artifact));
++
++		return project;
++
++	}
++
++	/**
++	 * Remote central repository.
++	 */
++	public static RemoteRepository newRepoCentral() throws Exception {
++		final RemoteRepository central = new RemoteRepository("central",
++				"default", "http://repo1.maven.org/maven2/");
++		return central;
++	}
++
++	/**
++	 * Local user repository.
++	 */
++	public static LocalRepository newRepoLocal() throws Exception {
++		final File home = new File(System.getProperty("user.home"));
++		final File repo = new File(home, ".m2/repository");
++		final LocalRepository localRepo = new LocalRepository(repo);
++		return localRepo;
++	}
++
++	/**
++	 * Default repository session.
++	 */
++	public static RepositorySystemSession newSession() throws Exception {
++		return newSession(newSystem());
++	}
++
++	/**
++	 * Default repository session.
++	 */
++	public static MavenRepositorySystemSession newSession(
++			RepositorySystem system) throws Exception {
++
++		final LocalRepository localRepo = newRepoLocal();
++
++		final MavenRepositorySystemSession session = new MavenRepositorySystemSession();
++
++		session.setLocalRepositoryManager(system
++				.newLocalRepositoryManager(localRepo));
++
++		return session;
++
++	}
++
++	/**
++	 * Default repository system.
++	 */
++	public static RepositorySystem newSystem() throws Exception {
++
++		DefaultServiceLocator locator = new DefaultServiceLocator();
++
++		locator.addService(VersionResolver.class, DefaultVersionResolver.class);
++
++		locator.addService(VersionRangeResolver.class,
++				DefaultVersionRangeResolver.class);
++
++		locator.addService(ArtifactDescriptorReader.class,
++				DefaultArtifactDescriptorReader.class);
++
++		locator.addService(WagonProvider.class, SimpleWagonProvider.class);
++
++		locator.addService(RepositoryConnectorFactory.class,
++				WagonRepositoryConnectorFactory.class);
++
++		return locator.getService(RepositorySystem.class);
++
++	}
++	
++	public static Logger logger(){
++
++		DefaultServiceLocator locator = new DefaultServiceLocator();
++		
++		return locator.getService(Logger.class);
++	}
++
++}

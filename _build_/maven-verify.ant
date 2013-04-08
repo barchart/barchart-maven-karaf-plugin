@@ -14,11 +14,16 @@
 
 		<exec executable="${executable}">
 
-			<arg value="clean" />
 			<arg value="verify" />
 
 			<arg value="--activate-profiles" />
 			<arg value="verify" />
+
+			<arg value="--define" />
+			<arg value="integrationTestName=test-feature-range" />
+
+			<arg value="--define" />
+			<arg value="skipTests=true" />
 
 		</exec>
 
