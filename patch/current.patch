@@ -576,16 +576,24 @@ index 0000000..3bdcab0
 +}
 diff --git a/src/main/java/org/apache/karaf/tooling/ap/SemanticTransformer.java b/src/main/java/org/apache/karaf/tooling/ap/SemanticTransformer.java
 new file mode 100644
-index 0000000..64ba1fc
+index 0000000..e24ca77
 --- /dev/null
 +++ b/src/main/java/org/apache/karaf/tooling/ap/SemanticTransformer.java
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,68 @@
 +package org.apache.karaf.tooling.ap;
 +
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++
 +import org.sonatype.aether.RepositoryException;
++import org.sonatype.aether.artifact.Artifact;
 +import org.sonatype.aether.collection.DependencyGraphTransformationContext;
 +import org.sonatype.aether.collection.DependencyGraphTransformer;
++import org.sonatype.aether.graph.Dependency;
 +import org.sonatype.aether.graph.DependencyNode;
++import org.sonatype.aether.util.graph.transformer.TransformationContextKeys;
++import org.sonatype.aether.version.VersionConstraint;
 +
 +/**
 + * @author Andrei Pozolotin
@@ -602,8 +610,80 @@ index 0000000..64ba1fc
 +
 +		log(node.toString());
 +
++		/**
++		 * "Object" is a "conflict" or a wrapper for maven artifact.
++		 * <p>
++		 * equality == group:artifact:classifier:extensions
++		 * <p>
++		 * identity == unique instance
++		 * <p>
++		 * Conflict list and map are produced by previous transformers.
++		 */
++
++		@SuppressWarnings("unchecked")
++		final List<Object> conflictList = (List<Object>) context
++				.get(TransformationContextKeys.SORTED_CONFLICT_IDS);
++
++		for (Object key : conflictList) {
++			log("\t key=" + key);
++		}
++
++		@SuppressWarnings("unchecked")
++		final Map<DependencyNode, Object> conflictMap = (Map<DependencyNode, Object>) context
++				.get(TransformationContextKeys.CONFLICT_IDS);
++
++		final Object key = conflictMap.get(node);
++		log("\t key=" + key);
++
++		final Dependency dependency = node.getDependency();
++
++		final VersionConstraint constraint = node.getVersionConstraint();
++		log("\t constraint=" + constraint);
++
++		final Artifact artifact = dependency.getArtifact();
++		log("\t artifact=" + artifact);
++
 +		return node;
 +
++	}
++
++}
+diff --git a/src/main/java/org/apache/karaf/tooling/ap/VersionType.java b/src/main/java/org/apache/karaf/tooling/ap/VersionType.java
+new file mode 100644
+index 0000000..01dc229
+--- /dev/null
++++ b/src/main/java/org/apache/karaf/tooling/ap/VersionType.java
+@@ -0,0 +1,33 @@
++package org.apache.karaf.tooling.ap;
++
++import org.sonatype.aether.version.VersionConstraint;
++
++public enum VersionType {
++
++	/***/
++	RANGE, //
++
++	/***/
++	VALUE, //
++
++	/***/
++	WRONG, //
++
++	;
++
++	public static VersionType type(final VersionConstraint constraint) {
++		if (constraint == null) {
++			return WRONG;
++		}
++		boolean hasRange = !constraint.getRanges().isEmpty();
++		boolean hasValue = constraint.getVersion() != null;
++		if (hasRange && !hasValue) {
++			return RANGE;
++		}
++		if (!hasRange && hasValue) {
++			return VALUE;
++		}
++		return WRONG;
 +	}
 +
 +}
