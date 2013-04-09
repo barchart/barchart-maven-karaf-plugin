@@ -18,7 +18,7 @@
 	<parent>
 		<groupId>com.barchart.base</groupId>
 		<artifactId>barchart-archon</artifactId>
-		<version>2.5.6</version>
+		<version>2.5.10</version>
 		<relativePath />
 	</parent>
 
@@ -452,14 +452,16 @@
 		def command = [ "git", "diff", "--relative", "--no-index",  "--", source, target ]
 		println "### command: ${command}"
 		
-		def builder = new ProcessBuilder(command).directory(baseDir)
-		def process = builder.start(); process.waitFor()
+		def process = command.execute(null, baseDir) 
+		def std = new StringBuilder()
+		def err = new StringBuilder()
+		process.waitForProcessOutput(std, err)
 		
-		def stdText = "${process.in.text}"
-		def errText = "${process.err.text}" 
+		def stdText = std.toString()
+		def errText = err.toString()
 		println "### result: ${errText}"
 		
-		if(errText.contains("error") || errText.contains("fatal")) {
+		if(errText.contains("error:") || errText.contains("fatal:")) {
 			throw new Exception("Git failed, see error messages above.")
 		}
 
