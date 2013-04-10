@@ -14,11 +14,14 @@
 
 		<exec executable="${executable}">
 
-			<arg value="release:clean" />
-			<arg value="release:prepare" />
-			<arg value="release:perform" />
+			<arg value="clean" />
+			<arg value="install" />
 
-			<arg value="-Darguments=-Pclone,copy,apply -DskipTests=true -Dinvoker.skip=true" />
+			<arg value="--define" />
+			<arg value="invoker.skip=true" />
+
+			<arg value="--define" />
+			<arg value="skipTests=true" />
 
 		</exec>
 
