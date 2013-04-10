@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<!-- Licensed to the Apache Software Foundation (ASF) under one or more 
 		contributor license agreements. See the NOTICE file distributed with this 
@@ -24,7 +23,7 @@
 
 	<groupId>org.apache.karaf.tooling</groupId>
 	<artifactId>karaf-maven-plugin</artifactId>
-	<version>3.0.0-build003-SNAPSHOT</version>
+	<version>3.0.0-build003</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>Apache Karaf :: Tooling :: Maven Karaf Plugin</name>
@@ -33,7 +32,7 @@
 		<url>https://github.com/barchart/barchart-maven-karaf-plugin</url>
 		<connection>scm:git:git://github.com/barchart/barchart-maven-karaf-plugin.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/barchart/barchart-maven-karaf-plugin.git</developerConnection>
-		<tag>master</tag>
+		<tag>karaf-maven-plugin-3.0.0-build003</tag>
 	</scm>
 
 	<properties>
