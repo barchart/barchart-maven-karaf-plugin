@@ -1,3 +1,44 @@
+diff --git a/src/it/test-feature-range/.project b/src/it/test-feature-range/.project
+new file mode 100644
+index 0000000..c0c7b19
+--- /dev/null
++++ b/src/it/test-feature-range/.project
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>test-feature-range</name>
++	<comment></comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.m2e.core.maven2Builder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.m2e.core.maven2Nature</nature>
++	</natures>
++</projectDescription>
+diff --git a/src/it/test-feature-range/.settings/org.eclipse.core.resources.prefs b/src/it/test-feature-range/.settings/org.eclipse.core.resources.prefs
+new file mode 100644
+index 0000000..99f26c0
+--- /dev/null
++++ b/src/it/test-feature-range/.settings/org.eclipse.core.resources.prefs
+@@ -0,0 +1,2 @@
++eclipse.preferences.version=1
++encoding/<project>=UTF-8
+diff --git a/src/it/test-feature-range/.settings/org.eclipse.m2e.core.prefs b/src/it/test-feature-range/.settings/org.eclipse.m2e.core.prefs
+new file mode 100644
+index 0000000..f897a7f
+--- /dev/null
++++ b/src/it/test-feature-range/.settings/org.eclipse.m2e.core.prefs
+@@ -0,0 +1,4 @@
++activeProfiles=
++eclipse.preferences.version=1
++resolveWorkspaceProjects=true
++version=1
 diff --git a/src/it/test-feature-range/_build_/maven-install-debug.ant b/src/it/test-feature-range/_build_/maven-install-debug.ant
 new file mode 100644
 index 0000000..b8dfc24
@@ -62,7 +103,7 @@ index 0000000..96291de
 +</project>
 diff --git a/src/it/test-feature-range/control.xml b/src/it/test-feature-range/control.xml
 new file mode 100644
-index 0000000..c578f59
+index 0000000..66039bd
 --- /dev/null
 +++ b/src/it/test-feature-range/control.xml
 @@ -0,0 +1,9 @@
@@ -70,17 +111,17 @@ index 0000000..c578f59
 +<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="test-feature-range">
 +    <feature name="test-feature-range" version="1.0-SNAPSHOT" description="test-feature-range">
 +        <details>test-feature-range</details>
-+        <bundle>mvn:com.barchart.version.tester/tester-one-api/3.1.1</bundle>
-+        <bundle>mvn:com.barchart.version.tester/tester-one-api-consumer/4.0.3</bundle>
-+        <bundle>mvn:com.barchart.version.tester/tester-one-api-provider/5.3.1</bundle>
++        <bundle>mvn:com.barchart.version.tester/tester-one-api/3.1.2</bundle>
++        <bundle>mvn:com.barchart.version.tester/tester-one-api-consumer/4.0.4</bundle>
++        <bundle>mvn:com.barchart.version.tester/tester-one-api-provider/5.3.2</bundle>
 +    </feature>
 +</features>
 diff --git a/src/it/test-feature-range/pom.xml b/src/it/test-feature-range/pom.xml
 new file mode 100644
-index 0000000..921729a
+index 0000000..4ecf8b1
 --- /dev/null
 +++ b/src/it/test-feature-range/pom.xml
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,61 @@
 +<?xml version="1.0" encoding="UTF-8"?>
 +<project
 +	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
@@ -127,7 +168,8 @@ index 0000000..921729a
 +			<plugin>
 +				<groupId>org.apache.karaf.tooling</groupId>
 +				<artifactId>karaf-maven-plugin</artifactId>
-+				<version>@project.version@</version>
++				<!-- <version>@project.version@</version> -->
++				<version>3.0.0-build004-SNAPSHOT</version>
 +				<executions>
 +					<execution>
 +						<goals>
@@ -139,8 +181,23 @@ index 0000000..921729a
 +
 +		</plugins>
 +	</build>
-+	
++
 +</project>
+diff --git a/src/it/test-feature-range/target/feature/feature.xml b/src/it/test-feature-range/target/feature/feature.xml
+new file mode 100644
+index 0000000..66039bd
+--- /dev/null
++++ b/src/it/test-feature-range/target/feature/feature.xml
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="test-feature-range">
++    <feature name="test-feature-range" version="1.0-SNAPSHOT" description="test-feature-range">
++        <details>test-feature-range</details>
++        <bundle>mvn:com.barchart.version.tester/tester-one-api/3.1.2</bundle>
++        <bundle>mvn:com.barchart.version.tester/tester-one-api-consumer/4.0.4</bundle>
++        <bundle>mvn:com.barchart.version.tester/tester-one-api-provider/5.3.2</bundle>
++    </feature>
++</features>
 diff --git a/src/it/test-feature-range/verify.bsh b/src/it/test-feature-range/verify.bsh
 new file mode 100644
 index 0000000..bba0bbf
@@ -179,12 +236,139 @@ index 0000000..bba0bbf
 +} catch (Throwable e) { 
 +	return false;
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/GenerateSemanticMojo.java b/src/main/java/org/apache/karaf/tooling/ap/GenerateSemanticMojo.java
+diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
+index 65d4aa8..4b4a995 100644
+--- a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
++++ b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
+@@ -103,7 +103,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      *
+      * @parameter default-value="${project.build.directory}/feature/feature.xml"
+      */
+-    private File outputFile;
++    protected File outputFile;
+ 
+     /**
+      * The resolver to use for the feature.  Normally null or "OBR" or "(OBR)"
+@@ -117,14 +117,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      *
+      * @parameter default-value="xml"
+      */
+-    private String attachmentArtifactType = "xml";
++    protected String attachmentArtifactType = "xml";
+ 
+     /**
+      * (wrapper) The artifact classifier for attaching the generated file to the project
+      *
+      * @parameter default-value="features"
+      */
+-    private String attachmentArtifactClassifier = "features";
++    protected String attachmentArtifactClassifier = "features";
+ 
+     /**
+      * Specifies whether features dependencies of this project will be included inline of the the
+@@ -169,7 +169,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      *
+      * @parameter default-value="true"
+      */
+-    private boolean includeTransitiveDependency;
++    protected boolean includeTransitiveDependency;
+ 
+     /**
+      * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
+@@ -208,7 +208,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @required
+      * @readonly
+      */
+-    private RepositorySystem repoSystem;
++    protected RepositorySystem repoSystem;
+ 
+     /**
+      * The current repository/network configuration of Maven.
+@@ -217,7 +217,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @required
+      * @readonly
+      */
+-    private RepositorySystemSession repoSession;
++    protected RepositorySystemSession repoSession;
+ 
+     /**
+      * The project's remote repositories to use for the resolution of project dependencies.
+@@ -225,7 +225,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @parameter default-value="${project.remoteProjectRepositories}"
+      * @readonly
+      */
+-    private List<RemoteRepository> projectRepos;
++    protected List<RemoteRepository> projectRepos;
+ 
+     /**
+      * The project's remote repositories to use for the resolution of plugins and their dependencies.
+@@ -234,7 +234,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+      * @required
+      * @readonly
+      */
+-    private List<RemoteRepository> pluginRepos;
++    protected List<RemoteRepository> pluginRepos;
+ 
+     /**
+      * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
+@@ -266,12 +266,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+     //maven log
+     private Log log;
+ 
++    protected void prepare() throws Exception {
++        DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
++        dependencyHelper.getDependencies(project, includeTransitiveDependency);
++        this.localDependencies = dependencyHelper.getLocalDependencies();
++        this.treeListing = dependencyHelper.getTreeListing();
++    }
++    
+     public void execute() throws MojoExecutionException, MojoFailureException {
+         try {
+-            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
+-            dependencyHelper.getDependencies(project, includeTransitiveDependency);
+-            this.localDependencies = dependencyHelper.getLocalDependencies();
+-            this.treeListing = dependencyHelper.getTreeListing();
++        	prepare();
+             File dir = outputFile.getParentFile();
+             if (dir.isDirectory() || dir.mkdirs()) {
+                 PrintStream out = new PrintStream(new FileOutputStream(outputFile));
+@@ -295,7 +299,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+     /*
+      * Write all project dependencies as feature
+      */
+-    private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
++    protected void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
+             IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
+         getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
+         //read in an existing feature.xml
+diff --git a/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java b/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
+index cb804e8..c9b2c07 100644
+--- a/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
++++ b/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
+@@ -36,6 +36,7 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
+ import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
+ import org.apache.maven.artifact.repository.metadata.Versioning;
+ import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
++import org.apache.maven.project.MavenProject;
+ import org.sonatype.aether.util.artifact.DefaultArtifact;
+ 
+ /**
+@@ -218,5 +219,9 @@ public class MavenUtil {
+         Writer writer = new FileWriter(target);
+         metadataWriter.write(writer, metadata);
+     }
++    
++    public static Artifact toAetherArtifact(MavenProject project){
++    	return null;
++    }
+ 
+ }
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/GenerateSemanticMojo.java b/src/main/java/org/apache/karaf/tooling/semantic/GenerateSemanticMojo.java
 new file mode 100644
-index 0000000..cd1375a
+index 0000000..3e3723e
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/GenerateSemanticMojo.java
-@@ -0,0 +1,199 @@
++++ b/src/main/java/org/apache/karaf/tooling/semantic/GenerateSemanticMojo.java
+@@ -0,0 +1,221 @@
 +/**
 + *
 + * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -202,7 +386,7 @@ index 0000000..cd1375a
 + * See the License for the specific language governing permissions and
 + * limitations under the License.
 + */
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import java.util.HashMap;
 +import java.util.HashSet;
@@ -211,15 +395,15 @@ index 0000000..cd1375a
 +import java.util.Map;
 +import java.util.Set;
 +
-+import org.apache.karaf.tooling.ap.eclipse.ConflictIdSorter;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictMarker;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver;
-+import org.apache.karaf.tooling.ap.eclipse.JavaScopeDeriver;
-+import org.apache.karaf.tooling.ap.eclipse.JavaScopeSelector;
-+import org.apache.karaf.tooling.ap.eclipse.NearestVersionSelector;
-+import org.apache.karaf.tooling.ap.eclipse.SimpleOptionalitySelector;
-+import org.apache.karaf.tooling.ap.xform.SnapshotTransformer;
 +import org.apache.karaf.tooling.features.GenerateDescriptorMojo;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictIdSorter;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictMarker;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver;
++import org.apache.karaf.tooling.semantic.eclipse.JavaScopeDeriver;
++import org.apache.karaf.tooling.semantic.eclipse.JavaScopeSelector;
++import org.apache.karaf.tooling.semantic.eclipse.NearestVersionSelector;
++import org.apache.karaf.tooling.semantic.eclipse.SimpleOptionalitySelector;
++import org.apache.karaf.tooling.semantic.xform.SnapshotTransformer;
 +import org.apache.maven.RepositoryUtils;
 +import org.sonatype.aether.artifact.Artifact;
 +import org.sonatype.aether.collection.CollectRequest;
@@ -241,7 +425,7 @@ index 0000000..cd1375a
 + * Generates the semantic features XML file for packaging=pom
 + * 
 + * @goal features-generate-semantic
-+ * @phase compile
++ * @phase package
 + * @requiresDependencyResolution runtime
 + * @inheritByDefault true
 + * @description TODO
@@ -269,6 +453,17 @@ index 0000000..cd1375a
 +	}
 +
 +	/**
++	 * Root artifact packaging to include. Default include: bundle.
++	 * 
++	 * @parameter
++	 */
++	protected Set<String> packagingIncluded;
++	{
++		packagingIncluded = new HashSet<String>();
++		packagingIncluded.add("bundle");
++	}
++
++	/**
 +	 * Dependency scope to exclude. Default exclude: runtime, provided, system,
 +	 * test.
 +	 * 
@@ -293,6 +488,7 @@ index 0000000..cd1375a
 +	 */
 +	public static Map<Artifact, String> prepare(MojoContext context)
 +			throws Exception {
++
 +		Artifact artifact = RepositoryUtils.toArtifact(context.project
 +				.getArtifact());
 +
@@ -314,7 +510,7 @@ index 0000000..cd1375a
 +		localSession.setDependencySelector(selector);
 +
 +		//
-+		
++
 +		ConflictMarker marker = new ConflictMarker();
 +		ConflictIdSorter sorter = new ConflictIdSorter();
 +
@@ -335,7 +531,7 @@ index 0000000..cd1375a
 +		localSession.setDependencyGraphTransformer(transformer);
 +
 +		//
-+		
++
 +		CollectResult collectResult = context.system.collectDependencies(
 +				localSession, collectRequest);
 +
@@ -358,14 +554,23 @@ index 0000000..cd1375a
 +		Map<Artifact, String> dependencyMap = new LinkedHashMap<Artifact, String>();
 +
 +		for (Dependency dependency : dependencyList) {
-+			if (!equals(root, dependency)) {
 +
-+				context.logger.info("\t " + dependency);
++			boolean isRootNode = equals(root, dependency);
 +
-+				dependencyMap.put(dependency.getArtifact(),
-+						dependency.getScope());
++			boolean isPackagingIncluded = context.packagingIncluded
++					.contains(context.project.getPackaging());
 +
++			if (isRootNode) {
++				if (!isPackagingIncluded) {
++					context.logger.info("Excluded: " + dependency);
++					continue;
++				}
 +			}
++
++			context.logger.info("\t " + dependency);
++
++			dependencyMap.put(dependency.getArtifact(), dependency.getScope());
++
 +		}
 +
 +		return dependencyMap;
@@ -374,23 +579,24 @@ index 0000000..cd1375a
 +	@Override
 +	protected void prepare() throws Exception {
 +
-+		MojoContext context = new MojoContext(getLogger(), this.project,
-+				this.scopeIncluded, this.scopeExcluded, this.repoSystem,
-+				this.repoSession, this.projectRepos, this.resolverSettings);
++		MojoContext context = new MojoContext(getLogger(), project,
++				scopeIncluded, scopeExcluded, repoSystem, repoSession,
++				projectRepos, resolverSettings, packagingIncluded);
 +
 +		this.localDependencies = prepare(context);
 +
 +		this.treeListing = "not available";
++
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/MojoContext.java b/src/main/java/org/apache/karaf/tooling/ap/MojoContext.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/MojoContext.java b/src/main/java/org/apache/karaf/tooling/semantic/MojoContext.java
 new file mode 100644
-index 0000000..fe67338
+index 0000000..b67103a
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/MojoContext.java
-@@ -0,0 +1,42 @@
-+package org.apache.karaf.tooling.ap;
++++ b/src/main/java/org/apache/karaf/tooling/semantic/MojoContext.java
+@@ -0,0 +1,46 @@
++package org.apache.karaf.tooling.semantic;
 +
 +import java.util.List;
 +import java.util.Map;
@@ -411,6 +617,7 @@ index 0000000..fe67338
 +	public final RepositorySystemSession session;
 +	public final List<RemoteRepository> projectRepos;
 +	public final Map<String, String> resolverSettings;
++	public final Set<String> packagingIncluded;
 +
 +	public MojoContext( //
 +			Logger logger, //
@@ -420,7 +627,8 @@ index 0000000..fe67338
 +			RepositorySystem system, //
 +			RepositorySystemSession session, //
 +			List<RemoteRepository> projectRepos, //
-+			Map<String, String> resolverSettings //
++			Map<String, String> resolverSettings, //
++			Set<String> packagingIncluded //
 +	) {
 +		this.logger = logger;
 +		this.project = project;
@@ -430,15 +638,17 @@ index 0000000..fe67338
 +		this.session = session;
 +		this.projectRepos = projectRepos;
 +		this.resolverSettings = resolverSettings;
++		this.packagingIncluded = packagingIncluded;
 +	}
++	
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/ReflectUtil.java b/src/main/java/org/apache/karaf/tooling/ap/ReflectUtil.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/ReflectUtil.java b/src/main/java/org/apache/karaf/tooling/semantic/ReflectUtil.java
 new file mode 100644
-index 0000000..f0a5bbe
+index 0000000..42acec1
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/ReflectUtil.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/ReflectUtil.java
 @@ -0,0 +1,18 @@
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import java.lang.reflect.Field;
 +
@@ -456,11 +666,11 @@ index 0000000..f0a5bbe
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictIdSorter.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictIdSorter.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictIdSorter.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictIdSorter.java
 new file mode 100644
-index 0000000..f0992dc
+index 0000000..682c875
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictIdSorter.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictIdSorter.java
 @@ -0,0 +1,363 @@
 +/*******************************************************************************
 + * Copyright (c) 2010, 2012 Sonatype, Inc.
@@ -472,7 +682,7 @@ index 0000000..f0992dc
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +import java.util.ArrayList;
 +import java.util.Collection;
@@ -825,11 +1035,11 @@ index 0000000..f0992dc
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictMarker.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictMarker.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictMarker.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictMarker.java
 new file mode 100644
-index 0000000..be243ac
+index 0000000..512ca72
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictMarker.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictMarker.java
 @@ -0,0 +1,308 @@
 +/*******************************************************************************
 + * Copyright (c) 2010, 2012 Sonatype, Inc.
@@ -841,7 +1051,7 @@ index 0000000..be243ac
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +import java.util.Collection;
 +import java.util.Collections;
@@ -1139,11 +1349,11 @@ index 0000000..be243ac
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictResolver.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictResolver.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictResolver.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictResolver.java
 new file mode 100644
-index 0000000..1c351a5
+index 0000000..d396a6c
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ConflictResolver.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ConflictResolver.java
 @@ -0,0 +1,1313 @@
 +/*******************************************************************************
 + * Copyright (c) 2012, 2013 Sonatype, Inc.
@@ -1155,7 +1365,7 @@ index 0000000..1c351a5
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +import java.util.ArrayList;
 +import java.util.Arrays;
@@ -2458,24 +2668,24 @@ index 0000000..1c351a5
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/ContextKeys.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ContextKeys.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ContextKeys.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ContextKeys.java
 new file mode 100644
-index 0000000..7801374
+index 0000000..507cf66
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/ContextKeys.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/ContextKeys.java
 @@ -0,0 +1,7 @@
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +public class ContextKeys {
 +	
 +	public static final String STATS = "STATS";
 +	
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/JavaScopeDeriver.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/JavaScopeDeriver.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/JavaScopeDeriver.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/JavaScopeDeriver.java
 new file mode 100644
-index 0000000..e1fcd94
+index 0000000..1d34c92
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/JavaScopeDeriver.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/JavaScopeDeriver.java
 @@ -0,0 +1,68 @@
 +/*******************************************************************************
 + * Copyright (c) 2012, 2013 Sonatype, Inc.
@@ -2487,10 +2697,10 @@ index 0000000..e1fcd94
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ScopeContext;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ScopeDeriver;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ScopeContext;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ScopeDeriver;
 +import org.sonatype.aether.RepositoryException;
 +import org.sonatype.aether.util.artifact.JavaScopes;
 +
@@ -2545,11 +2755,11 @@ index 0000000..e1fcd94
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/JavaScopeSelector.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/JavaScopeSelector.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/JavaScopeSelector.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/JavaScopeSelector.java
 new file mode 100644
-index 0000000..22d91bc
+index 0000000..51637fc
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/JavaScopeSelector.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/JavaScopeSelector.java
 @@ -0,0 +1,99 @@
 +/*******************************************************************************
 + * Copyright (c) 2012, 2013 Sonatype, Inc.
@@ -2561,15 +2771,15 @@ index 0000000..22d91bc
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +import java.util.Collection;
 +import java.util.HashSet;
 +import java.util.Set;
 +
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ConflictContext;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ConflictItem;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ScopeSelector;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ConflictContext;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ConflictItem;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ScopeSelector;
 +import org.sonatype.aether.RepositoryException;
 +import org.sonatype.aether.util.artifact.JavaScopes;
 +
@@ -2650,11 +2860,11 @@ index 0000000..22d91bc
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/NearestVersionSelector.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/NearestVersionSelector.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/NearestVersionSelector.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/NearestVersionSelector.java
 new file mode 100644
-index 0000000..9c50f85
+index 0000000..61f1c17
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/NearestVersionSelector.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/NearestVersionSelector.java
 @@ -0,0 +1,177 @@
 +/*******************************************************************************
 + * Copyright (c) 2012, 2013 Sonatype, Inc.
@@ -2666,7 +2876,7 @@ index 0000000..9c50f85
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +import java.util.ArrayList;
 +import java.util.Collection;
@@ -2674,9 +2884,9 @@ index 0000000..9c50f85
 +import java.util.Iterator;
 +import java.util.List;
 +
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ConflictContext;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ConflictItem;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.VersionSelector;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ConflictContext;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ConflictItem;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.VersionSelector;
 +import org.sonatype.aether.RepositoryException;
 +import org.sonatype.aether.collection.UnsolvableVersionConflictException;
 +import org.sonatype.aether.graph.DependencyFilter;
@@ -2833,11 +3043,11 @@ index 0000000..9c50f85
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/SimpleOptionalitySelector.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/SimpleOptionalitySelector.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/SimpleOptionalitySelector.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/SimpleOptionalitySelector.java
 new file mode 100644
-index 0000000..b16e765
+index 0000000..18db096
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/SimpleOptionalitySelector.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/SimpleOptionalitySelector.java
 @@ -0,0 +1,62 @@
 +/*******************************************************************************
 + * Copyright (c) 2013 Sonatype, Inc.
@@ -2849,13 +3059,13 @@ index 0000000..b16e765
 + * Contributors:
 + *    Sonatype, Inc. - initial API and implementation
 + *******************************************************************************/
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +import java.util.Collection;
 +
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ConflictContext;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.ConflictItem;
-+import org.apache.karaf.tooling.ap.eclipse.ConflictResolver.OptionalitySelector;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ConflictContext;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.ConflictItem;
++import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver.OptionalitySelector;
 +import org.sonatype.aether.RepositoryException;
 +
 +
@@ -2901,33 +3111,33 @@ index 0000000..b16e765
 +    }
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/eclipse/package-info.java b/src/main/java/org/apache/karaf/tooling/ap/eclipse/package-info.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/eclipse/package-info.java b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/package-info.java
 new file mode 100644
-index 0000000..317a87b
+index 0000000..adc93d4
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/eclipse/package-info.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/eclipse/package-info.java
 @@ -0,0 +1,5 @@
-+package org.apache.karaf.tooling.ap.eclipse;
++package org.apache.karaf.tooling.semantic.eclipse;
 +
 +/**
 + * Back port from https://github.com/eclipse/aether-core
 + */
 \ No newline at end of file
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/package-info.java b/src/main/java/org/apache/karaf/tooling/ap/package-info.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/package-info.java b/src/main/java/org/apache/karaf/tooling/semantic/package-info.java
 new file mode 100644
-index 0000000..f8e7315
+index 0000000..5131b0d
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/package-info.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/package-info.java
 @@ -0,0 +1,2 @@
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRange.java b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRange.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRange.java b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRange.java
 new file mode 100644
-index 0000000..01f00aa
+index 0000000..14fb81c
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRange.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRange.java
 @@ -0,0 +1,111 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
 +import org.sonatype.aether.version.Version;
 +
@@ -3038,13 +3248,13 @@ index 0000000..01f00aa
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeBase.java b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeBase.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeBase.java b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeBase.java
 new file mode 100644
-index 0000000..eb68c1a
+index 0000000..742a764
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeBase.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeBase.java
 @@ -0,0 +1,14 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
 +public abstract class SemanticRangeBase implements SemanticRange {
 +
@@ -3058,13 +3268,13 @@ index 0000000..eb68c1a
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeFactory.java b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeFactory.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeFactory.java b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeFactory.java
 new file mode 100644
-index 0000000..26fd0d2
+index 0000000..bacd591
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeFactory.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeFactory.java
 @@ -0,0 +1,43 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
 +import java.util.Collection;
 +import java.util.Iterator;
@@ -3107,13 +3317,13 @@ index 0000000..26fd0d2
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeList.java b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeList.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeList.java b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeList.java
 new file mode 100644
-index 0000000..43643cc
+index 0000000..9ff8bbe
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeList.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeList.java
 @@ -0,0 +1,8 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
 +import java.util.concurrent.CopyOnWriteArrayList;
 +
@@ -3121,13 +3331,13 @@ index 0000000..43643cc
 +public class SemanticRangeList extends CopyOnWriteArrayList<SemanticRange>{
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangePoint.java b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangePoint.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangePoint.java b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangePoint.java
 new file mode 100644
-index 0000000..61237dc
+index 0000000..ff486fc
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangePoint.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangePoint.java
 @@ -0,0 +1,33 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
 +import org.sonatype.aether.version.Version;
 +import org.sonatype.aether.version.VersionRange;
@@ -3160,15 +3370,15 @@ index 0000000..61237dc
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeSpan.java b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeSpan.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeSpan.java b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeSpan.java
 new file mode 100644
-index 0000000..f03ac11
+index 0000000..614a439
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/SemanticRangeSpan.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/SemanticRangeSpan.java
 @@ -0,0 +1,38 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
-+import org.apache.karaf.tooling.ap.ReflectUtil;
++import org.apache.karaf.tooling.semantic.ReflectUtil;
 +import org.sonatype.aether.version.Version;
 +import org.sonatype.aether.version.VersionRange;
 +
@@ -3204,13 +3414,13 @@ index 0000000..f03ac11
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/VersionType.java b/src/main/java/org/apache/karaf/tooling/ap/range/VersionType.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/VersionType.java b/src/main/java/org/apache/karaf/tooling/semantic/range/VersionType.java
 new file mode 100644
-index 0000000..8b449a2
+index 0000000..2d597ef
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/VersionType.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/VersionType.java
 @@ -0,0 +1,33 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
 +import org.sonatype.aether.version.VersionConstraint;
 +
@@ -3243,21 +3453,21 @@ index 0000000..8b449a2
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/range/package-info.java b/src/main/java/org/apache/karaf/tooling/ap/range/package-info.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/range/package-info.java b/src/main/java/org/apache/karaf/tooling/semantic/range/package-info.java
 new file mode 100644
-index 0000000..2ebd819
+index 0000000..71243a1
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/range/package-info.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/range/package-info.java
 @@ -0,0 +1,2 @@
-+package org.apache.karaf.tooling.ap.range;
++package org.apache.karaf.tooling.semantic.range;
 +
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/xform/BaseTransformer.java b/src/main/java/org/apache/karaf/tooling/ap/xform/BaseTransformer.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/xform/BaseTransformer.java b/src/main/java/org/apache/karaf/tooling/semantic/xform/BaseTransformer.java
 new file mode 100644
-index 0000000..5f9cf61
+index 0000000..ce7bbe9
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/xform/BaseTransformer.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/xform/BaseTransformer.java
 @@ -0,0 +1,63 @@
-+package org.apache.karaf.tooling.ap.xform;
++package org.apache.karaf.tooling.semantic.xform;
 +
 +import java.util.Collection;
 +import java.util.HashMap;
@@ -3266,10 +3476,10 @@ index 0000000..5f9cf61
 +import java.util.Map;
 +import java.util.Set;
 +
-+import org.apache.karaf.tooling.ap.range.SemanticRangeFactory;
-+import org.apache.karaf.tooling.ap.range.SemanticRangeList;
-+import org.apache.karaf.tooling.ap.range.SemanticRange;
-+import org.apache.karaf.tooling.ap.range.VersionType;
++import org.apache.karaf.tooling.semantic.range.SemanticRange;
++import org.apache.karaf.tooling.semantic.range.SemanticRangeFactory;
++import org.apache.karaf.tooling.semantic.range.SemanticRangeList;
++import org.apache.karaf.tooling.semantic.range.VersionType;
 +import org.sonatype.aether.RepositoryException;
 +import org.sonatype.aether.artifact.Artifact;
 +import org.sonatype.aether.collection.DependencyGraphTransformationContext;
@@ -3320,13 +3530,13 @@ index 0000000..5f9cf61
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/xform/ExperimentalTransformer.java b/src/main/java/org/apache/karaf/tooling/ap/xform/ExperimentalTransformer.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/xform/ExperimentalTransformer.java b/src/main/java/org/apache/karaf/tooling/semantic/xform/ExperimentalTransformer.java
 new file mode 100644
-index 0000000..6ce3620
+index 0000000..b618e32
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/xform/ExperimentalTransformer.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/xform/ExperimentalTransformer.java
 @@ -0,0 +1,218 @@
-+package org.apache.karaf.tooling.ap.xform;
++package org.apache.karaf.tooling.semantic.xform;
 +
 +import java.util.Collection;
 +import java.util.HashMap;
@@ -3335,10 +3545,10 @@ index 0000000..6ce3620
 +import java.util.Map;
 +import java.util.Set;
 +
-+import org.apache.karaf.tooling.ap.range.SemanticRangeFactory;
-+import org.apache.karaf.tooling.ap.range.SemanticRangeList;
-+import org.apache.karaf.tooling.ap.range.SemanticRange;
-+import org.apache.karaf.tooling.ap.range.VersionType;
++import org.apache.karaf.tooling.semantic.range.SemanticRange;
++import org.apache.karaf.tooling.semantic.range.SemanticRangeFactory;
++import org.apache.karaf.tooling.semantic.range.SemanticRangeList;
++import org.apache.karaf.tooling.semantic.range.VersionType;
 +import org.sonatype.aether.RepositoryException;
 +import org.sonatype.aether.artifact.Artifact;
 +import org.sonatype.aether.collection.DependencyGraphTransformationContext;
@@ -3544,13 +3754,13 @@ index 0000000..6ce3620
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/xform/NearestTransformer.java b/src/main/java/org/apache/karaf/tooling/ap/xform/NearestTransformer.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/xform/NearestTransformer.java b/src/main/java/org/apache/karaf/tooling/semantic/xform/NearestTransformer.java
 new file mode 100644
-index 0000000..a2baa59
+index 0000000..ca6b8f0
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/xform/NearestTransformer.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/xform/NearestTransformer.java
 @@ -0,0 +1,267 @@
-+package org.apache.karaf.tooling.ap.xform;
++package org.apache.karaf.tooling.semantic.xform;
 +
 +import java.util.Collection;
 +import java.util.HashSet;
@@ -3817,18 +4027,19 @@ index 0000000..a2baa59
 +	}
 +
 +}
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/xform/SnapshotTransformer.java b/src/main/java/org/apache/karaf/tooling/ap/xform/SnapshotTransformer.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/xform/SnapshotTransformer.java b/src/main/java/org/apache/karaf/tooling/semantic/xform/SnapshotTransformer.java
 new file mode 100644
-index 0000000..a972932
+index 0000000..2db2b03
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/xform/SnapshotTransformer.java
-@@ -0,0 +1,60 @@
-+package org.apache.karaf.tooling.ap.xform;
++++ b/src/main/java/org/apache/karaf/tooling/semantic/xform/SnapshotTransformer.java
+@@ -0,0 +1,61 @@
++package org.apache.karaf.tooling.semantic.xform;
 +
 +import java.util.Iterator;
 +import java.util.List;
 +import java.util.Map;
-+import org.apache.karaf.tooling.ap.range.VersionType;
++
++import org.apache.karaf.tooling.semantic.range.VersionType;
 +import org.sonatype.aether.RepositoryException;
 +import org.sonatype.aether.artifact.Artifact;
 +import org.sonatype.aether.collection.DependencyGraphTransformationContext;
@@ -3884,146 +4095,19 @@ index 0000000..a972932
 +	}
 +}
 \ No newline at end of file
-diff --git a/src/main/java/org/apache/karaf/tooling/ap/xform/package-info.java b/src/main/java/org/apache/karaf/tooling/ap/xform/package-info.java
+diff --git a/src/main/java/org/apache/karaf/tooling/semantic/xform/package-info.java b/src/main/java/org/apache/karaf/tooling/semantic/xform/package-info.java
 new file mode 100644
-index 0000000..93b2aa4
+index 0000000..a98ed44
 --- /dev/null
-+++ b/src/main/java/org/apache/karaf/tooling/ap/xform/package-info.java
++++ b/src/main/java/org/apache/karaf/tooling/semantic/xform/package-info.java
 @@ -0,0 +1,2 @@
-+package org.apache.karaf.tooling.ap.xform;
++package org.apache.karaf.tooling.semantic.xform;
 +
-diff --git a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-index 65d4aa8..4b4a995 100644
---- a/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-+++ b/src/main/java/org/apache/karaf/tooling/features/GenerateDescriptorMojo.java
-@@ -103,7 +103,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      *
-      * @parameter default-value="${project.build.directory}/feature/feature.xml"
-      */
--    private File outputFile;
-+    protected File outputFile;
- 
-     /**
-      * The resolver to use for the feature.  Normally null or "OBR" or "(OBR)"
-@@ -117,14 +117,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      *
-      * @parameter default-value="xml"
-      */
--    private String attachmentArtifactType = "xml";
-+    protected String attachmentArtifactType = "xml";
- 
-     /**
-      * (wrapper) The artifact classifier for attaching the generated file to the project
-      *
-      * @parameter default-value="features"
-      */
--    private String attachmentArtifactClassifier = "features";
-+    protected String attachmentArtifactClassifier = "features";
- 
-     /**
-      * Specifies whether features dependencies of this project will be included inline of the the
-@@ -169,7 +169,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      *
-      * @parameter default-value="true"
-      */
--    private boolean includeTransitiveDependency;
-+    protected boolean includeTransitiveDependency;
- 
-     /**
-      * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
-@@ -208,7 +208,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      * @required
-      * @readonly
-      */
--    private RepositorySystem repoSystem;
-+    protected RepositorySystem repoSystem;
- 
-     /**
-      * The current repository/network configuration of Maven.
-@@ -217,7 +217,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      * @required
-      * @readonly
-      */
--    private RepositorySystemSession repoSession;
-+    protected RepositorySystemSession repoSession;
- 
-     /**
-      * The project's remote repositories to use for the resolution of project dependencies.
-@@ -225,7 +225,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      * @parameter default-value="${project.remoteProjectRepositories}"
-      * @readonly
-      */
--    private List<RemoteRepository> projectRepos;
-+    protected List<RemoteRepository> projectRepos;
- 
-     /**
-      * The project's remote repositories to use for the resolution of plugins and their dependencies.
-@@ -234,7 +234,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-      * @required
-      * @readonly
-      */
--    private List<RemoteRepository> pluginRepos;
-+    protected List<RemoteRepository> pluginRepos;
- 
-     /**
-      * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
-@@ -266,12 +266,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-     //maven log
-     private Log log;
- 
-+    protected void prepare() throws Exception {
-+        DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
-+        dependencyHelper.getDependencies(project, includeTransitiveDependency);
-+        this.localDependencies = dependencyHelper.getLocalDependencies();
-+        this.treeListing = dependencyHelper.getTreeListing();
-+    }
-+    
-     public void execute() throws MojoExecutionException, MojoFailureException {
-         try {
--            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
--            dependencyHelper.getDependencies(project, includeTransitiveDependency);
--            this.localDependencies = dependencyHelper.getLocalDependencies();
--            this.treeListing = dependencyHelper.getTreeListing();
-+        	prepare();
-             File dir = outputFile.getParentFile();
-             if (dir.isDirectory() || dir.mkdirs()) {
-                 PrintStream out = new PrintStream(new FileOutputStream(outputFile));
-@@ -295,7 +299,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
-     /*
-      * Write all project dependencies as feature
-      */
--    private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
-+    protected void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
-             IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
-         getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
-         //read in an existing feature.xml
-diff --git a/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java b/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
-index cb804e8..c9b2c07 100644
---- a/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
-+++ b/src/main/java/org/apache/karaf/tooling/features/MavenUtil.java
-@@ -36,6 +36,7 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
- import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
- import org.apache.maven.artifact.repository.metadata.Versioning;
- import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
-+import org.apache.maven.project.MavenProject;
- import org.sonatype.aether.util.artifact.DefaultArtifact;
- 
- /**
-@@ -218,5 +219,9 @@ public class MavenUtil {
-         Writer writer = new FileWriter(target);
-         metadataWriter.write(writer, metadata);
-     }
-+    
-+    public static Artifact toAetherArtifact(MavenProject project){
-+    	return null;
-+    }
- 
- }
-diff --git a/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java b/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java
+diff --git a/src/test/java/org/apache/karaf/tooling/semantic/DependencyHelperTest.java b/src/test/java/org/apache/karaf/tooling/semantic/DependencyHelperTest.java
 new file mode 100644
-index 0000000..50317f2
+index 0000000..1d44018
 --- /dev/null
-+++ b/src/test/java/org/apache/karaf/tooling/ap/DependencyHelperTest.java
++++ b/src/test/java/org/apache/karaf/tooling/semantic/DependencyHelperTest.java
 @@ -0,0 +1,165 @@
 +/*
 + * Licensed to the Apache Software Foundation (ASF) under one
@@ -4044,7 +4128,7 @@ index 0000000..50317f2
 + * under the License.
 + */
 +
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import static org.junit.Assert.*;
 +
@@ -4190,12 +4274,12 @@ index 0000000..50317f2
 +	}
 +
 +}
-diff --git a/src/test/java/org/apache/karaf/tooling/ap/GenerateSemanticMojoTest.java b/src/test/java/org/apache/karaf/tooling/ap/GenerateSemanticMojoTest.java
+diff --git a/src/test/java/org/apache/karaf/tooling/semantic/GenerateSemanticMojoTest.java b/src/test/java/org/apache/karaf/tooling/semantic/GenerateSemanticMojoTest.java
 new file mode 100644
-index 0000000..bab1934
+index 0000000..9c19dfc
 --- /dev/null
-+++ b/src/test/java/org/apache/karaf/tooling/ap/GenerateSemanticMojoTest.java
-@@ -0,0 +1,182 @@
++++ b/src/test/java/org/apache/karaf/tooling/semantic/GenerateSemanticMojoTest.java
+@@ -0,0 +1,199 @@
 +/*
 + * Licensed to the Apache Software Foundation (ASF) under one
 + * or more contributor license agreements.  See the NOTICE file
@@ -4215,7 +4299,7 @@ index 0000000..bab1934
 + * under the License.
 + */
 +
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import static org.junit.Assert.*;
 +
@@ -4224,6 +4308,8 @@ index 0000000..bab1934
 +import java.util.Map;
 +import java.util.Set;
 +
++import org.apache.karaf.tooling.semantic.GenerateSemanticMojo;
++import org.apache.karaf.tooling.semantic.MojoContext;
 +import org.apache.maven.project.MavenProject;
 +import org.codehaus.plexus.logging.Logger;
 +import org.junit.Test;
@@ -4264,9 +4350,14 @@ index 0000000..bab1934
 +
 +		Map<String, String> resolverSettings = new HashMap<String, String>();
 +
++		Set<String> packagingIncluded = new HashSet<String>();
++		{
++			packagingIncluded.add("bundle");
++		}
++
 +		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 +				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-+				resolverSettings);
++				resolverSettings, packagingIncluded);
 +
 +		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 +				.prepare(context);
@@ -4277,7 +4368,7 @@ index 0000000..bab1934
 +			logger.info(artifact + " @ " + scope);
 +		}
 +
-+		assertEquals(0, dependencyMap.size());
++		assertEquals(1, dependencyMap.size());
 +
 +	}
 +
@@ -4312,9 +4403,14 @@ index 0000000..bab1934
 +
 +		Map<String, String> resolverSettings = new HashMap<String, String>();
 +
++		Set<String> packagingIncluded = new HashSet<String>();
++		{
++			packagingIncluded.add("bundle");
++		}
++
 +		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 +				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-+				resolverSettings);
++				resolverSettings, packagingIncluded);
 +
 +		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 +				.prepare(context);
@@ -4325,7 +4421,7 @@ index 0000000..bab1934
 +			logger.info(artifact + " @ " + scope);
 +		}
 +
-+		assertEquals(4, dependencyMap.size());
++		assertEquals(5, dependencyMap.size());
 +
 +	}
 +
@@ -4360,9 +4456,14 @@ index 0000000..bab1934
 +
 +		Map<String, String> resolverSettings = new HashMap<String, String>();
 +
++		Set<String> packagingIncluded = new HashSet<String>();
++		{
++			packagingIncluded.add("bundle");
++		}
++
 +		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 +				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-+				resolverSettings);
++				resolverSettings, packagingIncluded);
 +
 +		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 +				.prepare(context);
@@ -4378,11 +4479,11 @@ index 0000000..bab1934
 +	}
 +
 +}
-diff --git a/src/test/java/org/apache/karaf/tooling/ap/KarafDependencySelector.java b/src/test/java/org/apache/karaf/tooling/ap/KarafDependencySelector.java
+diff --git a/src/test/java/org/apache/karaf/tooling/semantic/KarafDependencySelector.java b/src/test/java/org/apache/karaf/tooling/semantic/KarafDependencySelector.java
 new file mode 100644
-index 0000000..66a9b1a
+index 0000000..afb52d0
 --- /dev/null
-+++ b/src/test/java/org/apache/karaf/tooling/ap/KarafDependencySelector.java
++++ b/src/test/java/org/apache/karaf/tooling/semantic/KarafDependencySelector.java
 @@ -0,0 +1,44 @@
 +/**
 + *
@@ -4401,7 +4502,7 @@ index 0000000..66a9b1a
 + * See the License for the specific language governing permissions and
 + * limitations under the License.
 + */
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import java.util.Collection;
 +
@@ -4428,11 +4529,11 @@ index 0000000..66a9b1a
 +	}
 +
 +}
-diff --git a/src/test/java/org/apache/karaf/tooling/ap/SimpleWagonProvider.java b/src/test/java/org/apache/karaf/tooling/ap/SimpleWagonProvider.java
+diff --git a/src/test/java/org/apache/karaf/tooling/semantic/SimpleWagonProvider.java b/src/test/java/org/apache/karaf/tooling/semantic/SimpleWagonProvider.java
 new file mode 100644
-index 0000000..3958a6f
+index 0000000..a2b96ef
 --- /dev/null
-+++ b/src/test/java/org/apache/karaf/tooling/ap/SimpleWagonProvider.java
++++ b/src/test/java/org/apache/karaf/tooling/semantic/SimpleWagonProvider.java
 @@ -0,0 +1,50 @@
 +/*
 + * Licensed to the Apache Software Foundation (ASF) under one
@@ -4453,7 +4554,7 @@ index 0000000..3958a6f
 + * under the License.
 + */
 +
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import org.apache.maven.wagon.Wagon;
 +import org.apache.maven.wagon.providers.http.LightweightHttpWagon;
@@ -4484,11 +4585,11 @@ index 0000000..3958a6f
 +	}
 +
 +}
-diff --git a/src/test/java/org/apache/karaf/tooling/ap/UnitHelp.java b/src/test/java/org/apache/karaf/tooling/ap/UnitHelp.java
+diff --git a/src/test/java/org/apache/karaf/tooling/semantic/UnitHelp.java b/src/test/java/org/apache/karaf/tooling/semantic/UnitHelp.java
 new file mode 100644
-index 0000000..ad0fa01
+index 0000000..b1579d3
 --- /dev/null
-+++ b/src/test/java/org/apache/karaf/tooling/ap/UnitHelp.java
++++ b/src/test/java/org/apache/karaf/tooling/semantic/UnitHelp.java
 @@ -0,0 +1,282 @@
 +/*
 + * Licensed to the Apache Software Foundation (ASF) under one
@@ -4509,7 +4610,7 @@ index 0000000..ad0fa01
 + * under the License.
 + */
 +
-+package org.apache.karaf.tooling.ap;
++package org.apache.karaf.tooling.semantic;
 +
 +import java.io.File;
 +import java.io.IOException;

@@ -19,6 +19,7 @@ public class MojoContext {
 	public final RepositorySystemSession session;
 	public final List<RemoteRepository> projectRepos;
 	public final Map<String, String> resolverSettings;
+	public final Set<String> packagingIncluded;
 
 	public MojoContext( //
 			Logger logger, //
@@ -28,7 +29,8 @@ public class MojoContext {
 			RepositorySystem system, //
 			RepositorySystemSession session, //
 			List<RemoteRepository> projectRepos, //
-			Map<String, String> resolverSettings //
+			Map<String, String> resolverSettings, //
+			Set<String> packagingIncluded //
 	) {
 		this.logger = logger;
 		this.project = project;
@@ -38,5 +40,7 @@ public class MojoContext {
 		this.session = session;
 		this.projectRepos = projectRepos;
 		this.resolverSettings = resolverSettings;
+		this.packagingIncluded = packagingIncluded;
 	}
+	
 }

@@ -82,6 +82,17 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	}
 
 	/**
+	 * Root artifact packaging to include. Default include: bundle.
+	 * 
+	 * @parameter
+	 */
+	protected Set<String> packagingIncluded;
+	{
+		packagingIncluded = new HashSet<String>();
+		packagingIncluded.add("bundle");
+	}
+
+	/**
 	 * Dependency scope to exclude. Default exclude: runtime, provided, system,
 	 * test.
 	 * 
@@ -106,6 +117,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	 */
 	public static Map<Artifact, String> prepare(MojoContext context)
 			throws Exception {
+
 		Artifact artifact = RepositoryUtils.toArtifact(context.project
 				.getArtifact());
 
@@ -127,7 +139,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 		localSession.setDependencySelector(selector);
 
 		//
-		
+
 		ConflictMarker marker = new ConflictMarker();
 		ConflictIdSorter sorter = new ConflictIdSorter();
 
@@ -148,7 +160,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 		localSession.setDependencyGraphTransformer(transformer);
 
 		//
-		
+
 		CollectResult collectResult = context.system.collectDependencies(
 				localSession, collectRequest);
 
@@ -171,14 +183,23 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 		Map<Artifact, String> dependencyMap = new LinkedHashMap<Artifact, String>();
 
 		for (Dependency dependency : dependencyList) {
-			if (!equals(root, dependency)) {
 
-				context.logger.info("\t " + dependency);
+			boolean isRootNode = equals(root, dependency);
 
-				dependencyMap.put(dependency.getArtifact(),
-						dependency.getScope());
+			boolean isPackagingIncluded = context.packagingIncluded
+					.contains(context.project.getPackaging());
 
+			if (isRootNode) {
+				if (!isPackagingIncluded) {
+					context.logger.info("Excluded: " + dependency);
+					continue;
+				}
 			}
+
+			context.logger.info("\t " + dependency);
+
+			dependencyMap.put(dependency.getArtifact(), dependency.getScope());
+
 		}
 
 		return dependencyMap;
@@ -187,13 +208,14 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	@Override
 	protected void prepare() throws Exception {
 
-		MojoContext context = new MojoContext(getLogger(), this.project,
-				this.scopeIncluded, this.scopeExcluded, this.repoSystem,
-				this.repoSession, this.projectRepos, this.resolverSettings);
+		MojoContext context = new MojoContext(getLogger(), project,
+				scopeIncluded, scopeExcluded, repoSystem, repoSession,
+				projectRepos, resolverSettings, packagingIncluded);
 
 		this.localDependencies = prepare(context);
 
 		this.treeListing = "not available";
+
 	}
 
 }

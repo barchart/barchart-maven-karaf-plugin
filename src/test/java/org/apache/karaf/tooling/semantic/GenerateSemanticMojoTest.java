@@ -68,9 +68,14 @@ public class GenerateSemanticMojoTest {
 
 		Map<String, String> resolverSettings = new HashMap<String, String>();
 
+		Set<String> packagingIncluded = new HashSet<String>();
+		{
+			packagingIncluded.add("bundle");
+		}
+
 		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings);
+				resolverSettings, packagingIncluded);
 
 		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
@@ -81,7 +86,7 @@ public class GenerateSemanticMojoTest {
 			logger.info(artifact + " @ " + scope);
 		}
 
-		assertEquals(0, dependencyMap.size());
+		assertEquals(1, dependencyMap.size());
 
 	}
 
@@ -116,9 +121,14 @@ public class GenerateSemanticMojoTest {
 
 		Map<String, String> resolverSettings = new HashMap<String, String>();
 
+		Set<String> packagingIncluded = new HashSet<String>();
+		{
+			packagingIncluded.add("bundle");
+		}
+
 		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings);
+				resolverSettings, packagingIncluded);
 
 		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
@@ -129,7 +139,7 @@ public class GenerateSemanticMojoTest {
 			logger.info(artifact + " @ " + scope);
 		}
 
-		assertEquals(4, dependencyMap.size());
+		assertEquals(5, dependencyMap.size());
 
 	}
 
@@ -164,9 +174,14 @@ public class GenerateSemanticMojoTest {
 
 		Map<String, String> resolverSettings = new HashMap<String, String>();
 
+		Set<String> packagingIncluded = new HashSet<String>();
+		{
+			packagingIncluded.add("bundle");
+		}
+
 		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings);
+				resolverSettings, packagingIncluded);
 
 		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
