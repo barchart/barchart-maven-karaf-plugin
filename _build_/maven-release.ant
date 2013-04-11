@@ -18,7 +18,7 @@
 			<arg value="release:prepare" />
 			<arg value="release:perform" />
 
-			<arg value="-Darguments=-Pclone,copy,apply -DskipTests=true -Dinvoker.skip=true" />
+			<arg value="-Darguments=-DskipTests=true -Dinvoker.skip=true" />
 
 		</exec>
 
