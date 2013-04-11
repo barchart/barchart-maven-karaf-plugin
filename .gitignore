@@ -26,7 +26,11 @@ release.properties
 pom.xml.*
 
 #
-# Working copy.
+# Working clone.
 #
 repo/
-src/
+
+#
+# Working copy.
+#
+#src/
