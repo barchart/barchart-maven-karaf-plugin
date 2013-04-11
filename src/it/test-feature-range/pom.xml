@@ -44,7 +44,8 @@
 			<plugin>
 				<groupId>org.apache.karaf.tooling</groupId>
 				<artifactId>karaf-maven-plugin</artifactId>
-				<version>@project.version@</version>
+				<!-- <version>@project.version@</version> -->
+				<version>3.0.0-build004-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -56,5 +57,5 @@
 
 		</plugins>
 	</build>
-	
+
 </project>
