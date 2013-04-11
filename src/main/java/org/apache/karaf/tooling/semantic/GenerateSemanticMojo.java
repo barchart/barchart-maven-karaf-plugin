@@ -54,7 +54,7 @@ import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransfor
  * Generates the semantic features XML file for packaging=pom
  * 
  * @goal features-generate-semantic
- * @phase compile
+ * @phase package
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description TODO
