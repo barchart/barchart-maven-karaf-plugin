@@ -23,7 +23,7 @@
 
 	<groupId>org.apache.karaf.tooling</groupId>
 	<artifactId>karaf-maven-plugin</artifactId>
-	<version>3.0.0-build005-SNAPSHOT</version>
+	<version>3.0.0-build005</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>Apache Karaf :: Tooling :: Maven Karaf Plugin</name>
@@ -32,7 +32,7 @@
 		<url>https://github.com/barchart/barchart-maven-karaf-plugin</url>
 		<connection>scm:git:git://github.com/barchart/barchart-maven-karaf-plugin.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/barchart/barchart-maven-karaf-plugin.git</developerConnection>
-		<tag>master</tag>
+		<tag>karaf-maven-plugin-3.0.0-build005</tag>
 	</scm>
 
 	<properties>
