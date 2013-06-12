@@ -17,8 +17,8 @@ import org.sonatype.aether.util.artifact.ArtifacIdUtils;
  * Customer transform.
  * <p>
  * Supported features
- * <li> remove all range snapshots
- * <li> remove all but regex-match range snapshots
+ * <li>remove all range snapshots
+ * <li>remove all but regex-match range snapshots
  */
 public class CustomerTransformer extends BaseTransformer {
 
@@ -61,34 +61,35 @@ public class CustomerTransformer extends BaseTransformer {
 		return node;
 	}
 
-	protected boolean isRangeSnapshtoRegext(DependencyNode node) {
-		return false;
-	}
-
 	protected void removeRangeSnapshot(DependencyNode root,
 			DependencyGraphTransformationContext context) {
 
-		Iterator<DependencyNode> iterator = root.getChildren().iterator();
+		final Iterator<DependencyNode> iterator = root.getChildren().iterator();
 
 		while (iterator.hasNext()) {
-			DependencyNode node = (DependencyNode) iterator.next();
 
-			VersionType versionType = VersionType.form(node
+			final DependencyNode node = (DependencyNode) iterator.next();
+
+			final VersionType versionType = VersionType.form(node
 					.getVersionConstraint());
 
-			Artifact artifact = node.getDependency().getArtifact();
-			String artifactGUID = ArtifacIdUtils.toId(artifact);
+			final Artifact artifact = node.getDependency().getArtifact();
+			final String version = artifact.getVersion();
+			final String artifactGUID = ArtifacIdUtils.toId(artifact);
+
+			// System.err.println("### artifact=" + artifact);
 
 			switch (versionType) {
 			case RANGE:
+				final boolean isSnapshot = isSnapshot(version);
 				if (enableRangeSnapshotRegex == null) {
 					/** Remove all snapshots. */
-					if (artifact.isSnapshot()) {
+					if (isSnapshot) {
 						iterator.remove();
 					}
 				} else {
 					/** Remove non-matching snapshots. */
-					if (artifact.isSnapshot()) {
+					if (isSnapshot) {
 						if (enableRangeSnapshotRegex.matcher(artifactGUID)
 								.matches()) {
 							/** Keep. */
@@ -103,4 +104,9 @@ public class CustomerTransformer extends BaseTransformer {
 			removeRangeSnapshot(node, context);
 		}
 	}
+
+	static boolean isSnapshot(String version) {
+		return version.endsWith("SNAPSHOT");
+	}
+
 }
