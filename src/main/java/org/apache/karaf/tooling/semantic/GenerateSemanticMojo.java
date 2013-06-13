@@ -33,7 +33,7 @@ import org.apache.karaf.tooling.semantic.eclipse.JavaScopeSelector;
 import org.apache.karaf.tooling.semantic.eclipse.NearestVersionSelector;
 import org.apache.karaf.tooling.semantic.eclipse.SimpleOptionalitySelector;
 import org.apache.karaf.tooling.semantic.selector.ExtensionDependencySelector;
-import org.apache.karaf.tooling.semantic.transformer.CustomerTransformer;
+import org.apache.karaf.tooling.semantic.transformer.CustomTransformer;
 import org.apache.maven.RepositoryUtils;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
@@ -123,7 +123,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	 * Customize resolver operation.
 	 * <p>
 	 * 
-	 * @see CustomerTransformer
+	 * @see CustomTransformer
 	 * 
 	 * @parameter
 	 */
@@ -160,7 +160,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 		ConflictMarker marker = new ConflictMarker();
 		ConflictIdSorter sorter = new ConflictIdSorter();
 
-		CustomerTransformer customer = new CustomerTransformer(
+		CustomTransformer customer = new CustomTransformer(
 				context.resolverSettings);
 
 		ConflictResolver.VersionSelector versionSelector = new NearestVersionSelector();
