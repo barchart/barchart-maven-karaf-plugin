@@ -1,5 +1,6 @@
 package org.apache.karaf.tooling.semantic.transformer;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -31,6 +32,37 @@ import org.apache.karaf.tooling.semantic.eclipse.ConflictResolver;
 public class CustomTransformer extends BaseTransformer {
 
 	/**
+	 * Identity of original pom.xml
+	 */
+	static class Project {
+
+		/**
+		 * Aether uses children list object as a proxy-id to the original
+		 * pom.xml.
+		 * <p>
+		 * {@link ConflictResolver.ConflictItem}
+		 * "unique owner of a child node which is the child list"
+		 */
+		static Object key(DependencyNode node) {
+			return node.getChildren();
+		}
+
+		/** Unique id of the original pom.xml */
+		final Object key;
+
+		final List<DependencyNode> nodeList;
+
+		/** Nodes which represent the same pom.xml */
+		final Set<DependencyNode> pomSet = new IdentityHashSet<DependencyNode>();
+
+		Project(List<DependencyNode> nodeList) {
+			this.key = nodeList;
+			this.nodeList = nodeList;
+		}
+
+	}
+
+	/**
 	 * Enable all snapshot dependencies which come form the range.
 	 */
 	public static final String ENABLE_RANGE_SNAPSHOT = "enableRangeSnapshot";
@@ -59,32 +91,46 @@ public class CustomTransformer extends BaseTransformer {
 
 	}
 
-	@Override
-	public DependencyNode transformGraph(final DependencyNode node,
-			final DependencyGraphTransformationContext context)
-			throws RepositoryException {
+	/**
+	 * Find all project roots.
+	 */
+	protected void discoverProjects(final DependencyNode root,
+			final Map<Object, List<DependencyNode>> pomMap) {
 
-		if (!this.enableRangeSnapshot) {
-			removeRangeSnapshot(node, context);
+		final List<DependencyNode> nodeList = root.getChildren();
+
+		/**
+		 * Aether uses children list object as a proxy-id to the original
+		 * pom.xml.
+		 * <p>
+		 * {@link ConflictResolver.ConflictItem}
+		 * "unique owner of a child node which is the child list"
+		 */
+		final Object parent = nodeList;
+
+		if (pomMap.containsKey(parent)) {
+			/** Already discovered. */
+			return;
+		} else {
+			/** New - remember now. */
+			pomMap.put(parent, nodeList);
 		}
 
-		return node;
+		for (final DependencyNode node : nodeList) {
+			discoverProjects(node, pomMap);
+		}
+
 	}
 
 	/**
-	 * Remove range-bound snapshots from collected resolver structures.
-	 * <p>
-	 * Does not affect non-range snapshots.
+	 * Find nodes to be removed.
 	 */
-	protected void removeRangeSnapshot(final DependencyNode root,
-			final DependencyGraphTransformationContext context) {
-
-		final Map<DependencyNode, Object> conflictMap = conflictMap(context);
+	protected void discoverRemoval(
+			final Map<DependencyNode, Object> conflictMap,
+			final Map<DependencyNode, Object> removalMap) {
 
 		final Set<Entry<DependencyNode, Object>> entrySet = conflictMap
 				.entrySet();
-
-		final Map<DependencyNode, Object> removalMap = new HashMap<DependencyNode, Object>();
 
 		for (final Entry<DependencyNode, Object> entry : entrySet) {
 
@@ -118,122 +164,82 @@ public class CustomTransformer extends BaseTransformer {
 
 		}
 
-		final Set<DependencyNode> removalSet = new HashSet<DependencyNode>();
-
-		for (final Entry<DependencyNode, Object> remove : removalMap.entrySet()) {
-			// remove(root, remove, removalSet);
-			// log("remove=" + remove.getKey() + " @ " + remove.getValue());
-		}
-
-		final DependencyVisitor visitor = new DependencyVisitor() {
-
-			@Override
-			public boolean visitEnter(DependencyNode node) {
-				log("enter=" + node);
-				return true;
-			}
-
-			@Override
-			public boolean visitLeave(DependencyNode node) {
-				log("leave=" + node);
-				return true;
-			}
-
-		};
-		// root.accept(visitor);
-
-		// scan(root, 0);
-
-		log("cycles=" + cycles(context));
-
-		/** pom.xml -> dependencies */
-		final Map<Object, List<DependencyNode>> pomMap = //
-		new IdentityHashMap<Object, List<DependencyNode>>();
-
-		discover(root, pomMap);
-
 	}
 
-	/** Identity of original pom.xml */
-	static class Project {
-
-		/**
-		 * Aether uses children list object as a proxy-id to the original
-		 * pom.xml.
-		 * <p>
-		 * {@link ConflictResolver.ConflictItem}
-		 * "unique owner of a child node which is the child list"
-		 */
-		static Object key(DependencyNode node) {
-			return node.getChildren();
-		}
-
-		/** Unique id of the original pom.xml */
-		final Object key;
-
-		final List<DependencyNode> nodeList;
-
-		Project(List<DependencyNode> nodeList) {
-			this.key = nodeList;
-			this.nodeList = nodeList;
-		}
-
-		/** Nodes which represent the same pom.xml */
-		final Set<DependencyNode> pomSet = new IdentityHashSet<DependencyNode>();
-
-	}
-
-	protected void discover(final DependencyNode root,
-			final Map<Object, List<DependencyNode>> pomMap) {
-
-		final List<DependencyNode> nodeList = root.getChildren();
-
-		final Object parent = nodeList;
-
-		if (pomMap.containsKey(parent)) {
-			/** Already discovered. */
-			return;
-		} else {
-			/** New - remember now. */
-			pomMap.put(parent, nodeList);
-		}
-
-		for (final DependencyNode node : nodeList) {
-			discover(node, pomMap);
-		}
-
-	}
-
-	/** XXX */
+	/**
+	 * Remove nodes from dependency list.
+	 */
 	protected void remove(final Map<Object, List<DependencyNode>> pomMap,
 			Map<DependencyNode, Object> removalMap) {
 
-	}
+		final Collection<List<DependencyNode>> dependencyList = pomMap.values();
 
-	protected void scan(DependencyNode root, int level) {
-		log("level=" + level + " " + root + " " + root.getChildren().hashCode());
-		for (final DependencyNode node : root.getChildren()) {
-			scan(node, level + 1);
-		}
-	}
+		final Set<DependencyNode> removalSet = removalMap.keySet();
 
-	protected void remove(final DependencyNode root,
-			final DependencyNode remove, final Set<DependencyNode> removalSet) {
-
-		for (final DependencyNode node : root.getChildren()) {
-			if (node == remove) {
-				removalSet.add(root);
-			} else {
-				remove(node, remove, removalSet);
+		for (final DependencyNode node : removalSet) {
+			for (final List<DependencyNode> nodeList : dependencyList) {
+				nodeList.remove(node);
 			}
 		}
 
 	}
 
 	/**
-	 * Do not use.
+	 * Remove range-bound snapshots from collected resolver structures.
+	 * <p>
+	 * Does not affect non-range snapshots.
 	 */
 	protected void removeRangeSnapshot(final DependencyNode root,
+			final DependencyGraphTransformationContext context) {
+
+		final long timeStart = System.currentTimeMillis();
+
+		/**
+		 * Collected dependency graph.
+		 */
+		final Map<DependencyNode, Object> conflictMap = conflictMap(context);
+		log("### conflictMap.size()=" + conflictMap.size());
+
+		/**
+		 * Dependency removal filter.
+		 */
+		final Map<DependencyNode, Object> removalMap = new HashMap<DependencyNode, Object>();
+		discoverRemoval(conflictMap, removalMap);
+		log("### removalMap.size()=" + removalMap.size());
+
+		/**
+		 * Discovered dependency roots.
+		 */
+		final Map<Object, List<DependencyNode>> parentMap = new IdentityHashMap<Object, List<DependencyNode>>();
+		discoverProjects(root, parentMap);
+		log("### parentMap.size()=" + parentMap.size());
+
+		remove(parentMap, removalMap);
+
+		final long timeFinish = System.currentTimeMillis();
+
+		final long timeDiff = timeFinish - timeStart;
+
+		log("### " + String.format("removal process time: %,d ms", timeDiff));
+
+	}
+
+	@Override
+	public DependencyNode transformGraph(final DependencyNode node,
+			final DependencyGraphTransformationContext context)
+			throws RepositoryException {
+
+		if (!this.enableRangeSnapshot) {
+			removeRangeSnapshot(node, context);
+		}
+
+		return node;
+	}
+
+	/**
+	 * Do not use.
+	 */
+	protected void zzzRemoveRangeSnapshot(final DependencyNode root,
 			final DependencyGraphTransformationContext context, final int level) {
 
 		final Iterator<DependencyNode> iterator = root.getChildren().iterator();
@@ -281,7 +287,7 @@ public class CustomTransformer extends BaseTransformer {
 
 			}
 
-			removeRangeSnapshot(node, context, level + 1);
+			zzzRemoveRangeSnapshot(node, context, level + 1);
 
 		}
 	}
