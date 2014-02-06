@@ -32,8 +32,7 @@ import org.apache.karaf.tooling.semantic.eclipse.JavaScopeDeriver;
 import org.apache.karaf.tooling.semantic.eclipse.JavaScopeSelector;
 import org.apache.karaf.tooling.semantic.eclipse.NearestVersionSelector;
 import org.apache.karaf.tooling.semantic.eclipse.SimpleOptionalitySelector;
-import org.apache.karaf.tooling.semantic.selector.ExtensionDependencySelector;
-import org.apache.karaf.tooling.semantic.transformer.CustomTransformer;
+import org.apache.karaf.tooling.semantic.xform.SnapshotTransformer;
 import org.apache.maven.RepositoryUtils;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
@@ -72,17 +71,6 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	}
 
 	/**
-	 * Root artifact packaging to include. Default include: bundle.
-	 * 
-	 * @parameter
-	 */
-	protected Set<String> packagingIncluded;
-	{
-		packagingIncluded = new HashSet<String>();
-		packagingIncluded.add("bundle");
-	}
-
-	/**
 	 * Dependency scope to include. Default include: compile.
 	 * 
 	 * @parameter
@@ -91,6 +79,17 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	{
 		scopeIncluded = new HashSet<String>();
 		scopeIncluded.add("compile");
+	}
+
+	/**
+	 * Root artifact packaging to include. Default include: bundle.
+	 * 
+	 * @parameter
+	 */
+	protected Set<String> packagingIncluded;
+	{
+		packagingIncluded = new HashSet<String>();
+		packagingIncluded.add("bundle");
 	}
 
 	/**
@@ -109,21 +108,6 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	}
 
 	/**
-	 * Dependency extension to include. Default include: jar.
-	 * 
-	 * @parameter
-	 */
-	protected Set<String> typeIncluded;
-	{
-		typeIncluded = new HashSet<String>();
-		typeIncluded.add("jar");
-	}
-
-	/**
-	 * Customize resolver operation.
-	 * <p>
-	 * 
-	 * @see CustomTransformer
 	 * 
 	 * @parameter
 	 */
@@ -147,8 +131,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 						new OptionalDependencySelector(),
 						new ScopeDependencySelector(context.scopeIncluded,
 								context.scopeExcluded),
-						new ExclusionDependencySelector(),
-						new ExtensionDependencySelector(context.typeIncluded), });
+						new ExclusionDependencySelector() });
 
 		DefaultRepositorySystemSession localSession = new DefaultRepositorySystemSession(
 				context.session);
@@ -160,7 +143,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 		ConflictMarker marker = new ConflictMarker();
 		ConflictIdSorter sorter = new ConflictIdSorter();
 
-		CustomTransformer customer = new CustomTransformer(
+		SnapshotTransformer snapper = new SnapshotTransformer(
 				context.resolverSettings);
 
 		ConflictResolver.VersionSelector versionSelector = new NearestVersionSelector();
@@ -172,7 +155,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 				scopeSelector, optionalitySelector, scopeDeriver);
 
 		ChainedDependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(
-				marker, sorter, customer, resolver);
+				marker, sorter, snapper, resolver);
 
 		localSession.setDependencyGraphTransformer(transformer);
 
@@ -227,7 +210,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 
 		MojoContext context = new MojoContext(getLogger(), project,
 				scopeIncluded, scopeExcluded, repoSystem, repoSession,
-				projectRepos, resolverSettings, packagingIncluded, typeIncluded);
+				projectRepos, resolverSettings, packagingIncluded);
 
 		this.localDependencies = prepare(context);
 

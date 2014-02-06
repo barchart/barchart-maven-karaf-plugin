@@ -73,14 +73,9 @@ public class GenerateSemanticMojoTest {
 			packagingIncluded.add("bundle");
 		}
 
-		Set<String> typeIncluded = new HashSet<String>();
-		{
-			typeIncluded.add("jar");
-		}
-
 		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings, packagingIncluded, typeIncluded);
+				resolverSettings, packagingIncluded);
 
 		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
@@ -131,14 +126,9 @@ public class GenerateSemanticMojoTest {
 			packagingIncluded.add("bundle");
 		}
 
-		Set<String> typeIncluded = new HashSet<String>();
-		{
-			typeIncluded.add("jar");
-		}
-
 		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings, packagingIncluded,typeIncluded);
+				resolverSettings, packagingIncluded);
 
 		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
@@ -189,14 +179,9 @@ public class GenerateSemanticMojoTest {
 			packagingIncluded.add("bundle");
 		}
 
-		Set<String> typeIncluded = new HashSet<String>();
-		{
-			typeIncluded.add("jar");
-		}
-
 		MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings, packagingIncluded, typeIncluded);
+				resolverSettings, packagingIncluded);
 
 		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);

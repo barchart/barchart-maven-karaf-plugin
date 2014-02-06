@@ -1,4 +1,4 @@
-package org.apache.karaf.tooling.semantic.transformer;
+package org.apache.karaf.tooling.semantic.xform;
 
 import java.util.Collection;
 import java.util.HashSet;

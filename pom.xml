@@ -277,12 +277,31 @@
 		} else{
 			command = [ "git", "clone", gitUrl, gitRepo ]
 			workDir = baseDir
+
+			def process = command.execute(null, baseDir) 
+			def std = new StringBuilder()
+			def err = new StringBuilder()
+			process.waitForProcessOutput(std, err)
+
+			// Process standard output..
+			def stdText = std.toString()
+			 
+			// Process error output.
+			def errText = err.toString()
+			println "### result: ${errText}"
+			
+			if(errText.contains("error:") || errText.contains("fatal:")){
+				throw new Exception("Git failed, see messages above. ")
+			}
+
+			command = [ "git", "checkout", "-b", "local-" + project.properties.projectKarafVersion, "karaf-" + project.properties.projectKarafVersion ]
+			workDir = new File("$gitRepo")
 		}
 		
 		// 		
 		println "### command: ${command}"
 
-		def process = command.execute(null, baseDir) 
+		def process = command.execute(null, workDir) 
 		def std = new StringBuilder()
 		def err = new StringBuilder()
 		process.waitForProcessOutput(std, err)

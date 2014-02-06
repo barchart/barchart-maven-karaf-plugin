@@ -2,24 +2,15 @@ package org.apache.karaf.tooling.semantic.range;
 
 import org.sonatype.aether.version.VersionConstraint;
 
-/**
- * Version type resolver
- */
 public enum VersionType {
 
-	/**
-	 * Version is range, i.e. [1,2)
-	 */
+	/***/
 	RANGE, //
 
-	/**
-	 * Version is value, i.e. 1.0.0
-	 */
+	/***/
 	VALUE, //
 
-	/**
-	 * Unexpected input.
-	 */
+	/***/
 	WRONG, //
 
 	;
@@ -28,8 +19,8 @@ public enum VersionType {
 		if (constraint == null) {
 			return WRONG;
 		}
-		final boolean hasRange = !constraint.getRanges().isEmpty();
-		final boolean hasValue = constraint.getVersion() != null;
+		boolean hasRange = !constraint.getRanges().isEmpty();
+		boolean hasValue = constraint.getVersion() != null;
 		if (hasRange && !hasValue) {
 			return RANGE;
 		}
